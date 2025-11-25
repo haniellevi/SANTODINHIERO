@@ -18,28 +18,28 @@ export type AnalyticsConfig = {
 }
 
 export const site = {
-  name: 'AI Coders Academy – Next.js SaaS Template',
-  shortName: 'AI Coders SaaS',
+  name: 'Santo Dinheiro - Seu Dinheiro Administrado com Propósito',
+  shortName: 'Santo Dinheiro',
   description:
-    'Template Next.js pronto para produção pela AI Coders Academy: autenticação, banco de dados, pagamentos e sistema de créditos incluídos.',
+    'Entradas, Saídas, Investimentos e Gastos Avulsos. De um Jeito tão simples que você vai amar!',
   url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-  author: 'AI Coders Academy (Vinicius Lana)',
-  keywords: ['SaaS', 'Next.js', 'TypeScript', 'Clerk', 'Prisma', 'Tailwind CSS', 'AI Coders Academy', 'Template', 'Microsaas'],
+  author: 'Rvs Tecnologia',
+  keywords: ['Mordomia Cristão', 'Orçamento Familiar', 'Jesus', 'Dinheiro', 'Investimento', 'Gestão Financeira', 'Gastos Avulsos', 'Entradas', 'Saídas', 'Investimentos', 'Prosperidade', 'Inteligência Financeira'],
   ogImage: '/og-image.png',
   logo: {
     light: '/logo-light.svg',
     dark: '/logo-dark.svg',
   } as LogoPaths,
   icons: {
-    favicon: '/favicon.ico',
+    favicon: '/favicon.svg',
     apple: '/apple-touch-icon.png',
-    shortcut: '/favicon-16x16.png',
+    shortcut: '/favicon.svg',
   } as IconPaths,
   socials: {
-    twitter: '@aicodersacademy',
+    twitter: '@santodinheiro',
   },
   support: {
-    email: 'suporte@aicoders.academy',
+    email: 'suporte@santodinheiro.com',
   },
   analytics: {
     gtmId: process.env.NEXT_PUBLIC_GTM_ID,

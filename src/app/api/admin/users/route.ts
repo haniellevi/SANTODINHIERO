@@ -1,97 +1,45 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { currentUser } from "@clerk/nextjs/server";
 import { isAdmin } from "@/lib/admin-utils";
-import { cache, getCacheKey } from "@/lib/cache";
-import { withApiLogging } from "@/lib/logging/api";
+import { prisma } from "@/lib/db";
 
-async function handleAdminUsersGet(request: Request) {
-  try {
-    const { userId } = await auth();
+export async function GET() {
+    try {
+        const user = await currentUser();
 
-    if (!userId || !(await isAdmin(userId))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+        if (!user || !(await isAdmin(user.id))) {
+            return new NextResponse("Unauthorized", { status: 401 });
+        }
 
-    const { searchParams } = new URL(request.url);
-    const page = Math.max(1, Number(searchParams.get("page") || 1));
-    const pageSize = Math.min(100, Math.max(1, Number(searchParams.get("pageSize") || 50)));
-    const search = searchParams.get("search")?.trim() || "";
-    const includeUsageCount = searchParams.get("includeUsageCount") === "true";
-
-    // Build where clause for search
-    const whereClause = search ? {
-      OR: [
-        { name: { contains: search, mode: 'insensitive' as const } },
-        { email: { contains: search, mode: 'insensitive' as const } },
-      ]
-    } : {};
-
-    // Create cache key based on query parameters
-    const cacheKey = getCacheKey('admin:users', page, pageSize, search, includeUsageCount.toString());
-
-    // Try to get from cache first (only for non-search queries to avoid stale search results)
-    if (!search) {
-      const cached = cache.get(cacheKey);
-      if (cached) {
-        return NextResponse.json(cached);
-      }
-    }
-
-    // Get total count and users in parallel
-    const [total, users] = await Promise.all([
-      db.user.count({ where: whereClause }),
-      db.user.findMany({
-        where: whereClause,
-        include: {
-          creditBalance: {
-            select: {
-              creditsRemaining: true,
+        // Get all users with their month count
+        const users = await prisma.user.findMany({
+            include: {
+                _count: {
+                    select: {
+                        months: true,
+                    },
+                },
             },
-          },
-          ...(includeUsageCount ? {
-            _count: {
-              select: {
-                usageHistory: true,
-              },
+            orderBy: {
+                createdAt: "desc",
             },
-          } : {}),
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-      }),
-    ]);
+        });
 
-    const result = {
-      users,
-      pagination: {
-        page,
-        pageSize,
-        total,
-        pages: Math.ceil(total / pageSize),
-      },
-    };
+        // Format response
+        const formattedUsers = users.map((u) => ({
+            id: u.id,
+            clerkId: u.clerkId,
+            email: u.email,
+            name: u.name,
+            isActive: u.isActive,
+            createdAt: u.createdAt,
+            updatedAt: u.updatedAt,
+            monthsCount: u._count.months,
+        }));
 
-    // Cache the result (only for non-search queries, cache for 2 minutes)
-    if (!search) {
-      cache.set(cacheKey, result, 120);
+        return NextResponse.json({ users: formattedUsers });
+    } catch (error) {
+        console.error("[ADMIN_USERS_GET]", error);
+        return new NextResponse("Internal Error", { status: 500 });
     }
-
-    return NextResponse.json(result);
-  } catch (error) {
-    console.error("Failed to fetch users:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch users" },
-      { status: 500 }
-    );
-  }
 }
-
-export const GET = withApiLogging(handleAdminUsersGet, {
-  method: "GET",
-  route: "/api/admin/users",
-  feature: "admin_users",
-})

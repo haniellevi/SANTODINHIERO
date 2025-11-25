@@ -1,52 +1,53 @@
-import { auth } from "@clerk/nextjs/server"
-import { NextResponse } from "next/server"
-import { isAdmin } from "@/lib/admin-utils"
-import { withApiLogging } from "@/lib/logging/api"
+import { NextResponse } from "next/server";
+import { currentUser } from "@clerk/nextjs/server";
+import { createClerkClient } from "@clerk/backend";
+import { isAdmin } from "@/lib/admin-utils";
 
-export const runtime = 'nodejs'
+const clerkClient = createClerkClient({
+    secretKey: process.env.CLERK_SECRET_KEY,
+});
 
-async function handleAdminInvitationResend(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> }
+export async function POST(
+    req: Request,
+    { params }: { params: { id: string } }
 ) {
-  try {
-    const { userId } = await auth()
-    if (!userId || !(await isAdmin(userId))) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
-    }
-
-    const { id } = await params
     try {
-      // Clerk Backend API for resend: POST /v1/invitations/{invitation_id}/resend
-      const token = process.env.CLERK_SECRET_KEY
-      if (!token) return NextResponse.json({ error: 'CLERK_SECRET_KEY não configurado' }, { status: 501 })
-      const url = `https://api.clerk.com/v1/invitations/${encodeURIComponent(id)}/resend`
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-      })
-      const text = await res.text()
-      if (!res.ok) {
-        let msg = text
-        try { const j = JSON.parse(text); msg = j?.message || j?.error || text } catch {}
-        return NextResponse.json({ error: msg || 'Falha ao reenviar' }, { status: res.status })
-      }
-      return NextResponse.json({ status: 'resent' })
-    } catch (err) {
-      const message = (err as { errors?: Array<{ message?: string }>; message?: string; status?: number })?.errors?.[0]?.message || (err as { message?: string })?.message || 'Falha ao reenviar convite'
-      return NextResponse.json({ error: message }, { status: (err as { status?: number })?.status || 500 })
-    }
-  } catch (error) {
-    return NextResponse.json({ error: (error as { message?: string })?.message || 'Erro inesperado' }, { status: 500 })
-  }
-}
+        const user = await currentUser();
 
-export const POST = withApiLogging(handleAdminInvitationResend, {
-  method: "POST",
-  route: "/api/admin/users/invitations/[id]/resend",
-  feature: "admin_users",
-})
+        if (!user || !(await isAdmin(user.id))) {
+            return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        const { id } = params;
+
+        // Get the invitation to resend
+        const invitation = await clerkClient.invitations.getInvitation(id);
+
+        if (!invitation.emailAddress) {
+            return new NextResponse("Invalid invitation", { status: 400 });
+        }
+
+        // Revoke old invitation and create a new one
+        await clerkClient.invitations.revokeInvitation(id);
+
+        const newInvitation = await clerkClient.invitations.createInvitation({
+            emailAddress: invitation.emailAddress,
+            redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/sign-up`,
+        });
+
+        return NextResponse.json({
+            success: true,
+            invitation: {
+                id: newInvitation.id,
+                emailAddress: newInvitation.emailAddress,
+                status: newInvitation.status,
+            },
+        });
+    } catch (error) {
+        console.error("[ADMIN_INVITATION_RESEND_POST]", error);
+        return new NextResponse(
+            error instanceof Error ? error.message : "Internal Error",
+            { status: 500 }
+        );
+    }
+}

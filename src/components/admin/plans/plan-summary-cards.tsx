@@ -1,25 +1,34 @@
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+"use client";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Package, CheckCircle } from "lucide-react";
 
 interface PlanSummaryCardsProps {
-  totalPlans: number;
-  activePlans: number;
+    totalPlans: number;
+    activePlans: number;
 }
 
 export function PlanSummaryCards({ totalPlans, activePlans }: PlanSummaryCardsProps) {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Total de Planos</CardTitle>
-          <div className="text-2xl font-bold">{totalPlans}</div>
-        </CardHeader>
-      </Card>
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Planos Ativos</CardTitle>
-          <div className="text-2xl font-bold text-green-600">{activePlans}</div>
-        </CardHeader>
-      </Card>
-    </div>
-  );
+    return (
+        <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total de Planos</CardTitle>
+                    <Package className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">{totalPlans}</div>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Planos Ativos</CardTitle>
+                    <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">{activePlans}</div>
+                </CardContent>
+            </Card>
+        </div>
+    );
 }

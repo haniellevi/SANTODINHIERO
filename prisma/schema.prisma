@@ -22,10 +22,8 @@ model User {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  creditBalance      CreditBalance?
-  usageHistory       UsageHistory[]
-  storageObjects     StorageObject[]
-  subscriptionEvents SubscriptionEvent[]
+
+  months             Month[]
 
   @@index([email])
   @@index([name])
@@ -34,139 +32,137 @@ model User {
 }
 
 
-// Workspace features and linkage to projects
-model Feature {
-  id          String     @id @default(cuid())
-  workspaceId String
-  name        String
-  description String?
-  tags        String[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 
-  @@index([workspaceId])
-}
-
-model CreditBalance {
-  id                String   @id @default(cuid())
-  userId            String   @unique
-  clerkUserId       String   @unique
-  creditsRemaining  Int      @default(100)  // Cached from Clerk
-  lastSyncedAt      DateTime @default(now())
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  user              User     @relation(fields: [userId], references: [id])
-  usageHistory      UsageHistory[]
-
-  @@index([userId])
-  @@index([clerkUserId])
-  @@index([creditsRemaining])
-  @@index([lastSyncedAt])
-}
-
-// Track individual usage events
-model UsageHistory {
-  id              String   @id @default(cuid())
-  userId          String
-  creditBalanceId String
-  operationType   OperationType
-  creditsUsed     Int
-  details         Json?
-  timestamp       DateTime @default(now())
-
-  user            User     @relation(fields: [userId], references: [id])
-  creditBalance   CreditBalance @relation(fields: [creditBalanceId], references: [id])
-
-  @@index([userId])
-  @@index([creditBalanceId])
-  @@index([timestamp])
-  @@index([operationType])
-  @@index([userId, timestamp])
-  @@index([operationType, timestamp])
-}
-
-enum OperationType {
-  AI_TEXT_CHAT
-  AI_IMAGE_GENERATION
-}
-
-// Singleton row storing admin-configurable credit settings
-model AdminSettings {
-  id           String   @id @default("singleton")
-  featureCosts Json?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-}
-
-// Subscription plans sourced from Clerk and configured credits
-model Plan {
+model Month {
   id        String   @id @default(cuid())
-  clerkId   String?  @unique // Clerk plan ID (e.g., cplan_*)
-  clerkName String?
-  name      String
-  credits   Int
-  active    Boolean  @default(true)
-  sortOrder Int      @default(0)
-  // Pricing synced from Clerk (amounts in cents)
-  currency           String?
-  priceMonthlyCents  Int?
-  priceYearlyCents   Int?
-  description        String?  @db.Text
-  features           Json?
-  badge              String?
-  highlight          Boolean  @default(false)
-  ctaType            String?  @default("checkout")
-  ctaLabel           String?
-  ctaUrl             String?
-  billingSource      String   @default("clerk")
+  userId    String
+  month     Int
+  year      Int
+  isOpen    Boolean  @default(true)
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([active])
-  @@index([sortOrder])
-}
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-// File/object uploads tracked for admin management
-model StorageObject {
-  id           String   @id @default(cuid())
-  userId       String
-  clerkUserId  String
-  provider     String   @default("vercel_blob")
-  url          String
-  pathname     String
-  name         String
-  contentType  String?
-  size         Int
-  deletedAt    DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  incomes      Income[]
+  expenses     Expense[]
+  investments  Investment[]
+  miscExpenses MiscExpense[]
 
-  user         User     @relation(fields: [userId], references: [id])
-
+  @@unique([userId, month, year])
   @@index([userId])
-  @@index([createdAt])
-  @@index([clerkUserId])
-  @@index([contentType])
-  @@index([deletedAt])
-  @@index([name])
 }
 
-// Track subscription lifecycle events for revenue analytics
-model SubscriptionEvent {
-  id           String   @id @default(cuid())
-  userId       String?
-  clerkUserId  String
-  planKey      String?
-  status       String
-  eventType    String
-  occurredAt   DateTime @default(now())
-  metadata     Json?
-  createdAt    DateTime @default(now())
+model Income {
+  id          String   @id @default(cuid())
+  monthId     String
+  description String
+  amount      Decimal  @db.Decimal(10, 2)
+  dayOfMonth  Int?
+  order       Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  user         User?    @relation(fields: [userId], references: [id])
+  month       Month    @relation(fields: [monthId], references: [id], onDelete: Cascade)
 
-  @@index([clerkUserId, occurredAt])
-  @@index([userId, occurredAt])
+  @@index([monthId])
+}
+
+model Expense {
+  id          String      @id @default(cuid())
+  monthId     String
+  description String
+  totalAmount Decimal     @db.Decimal(10, 2)
+  paidAmount  Decimal     @db.Decimal(10, 2) @default(0)
+  dayOfMonth  Int?
+  order       Int         @default(0)
+  type        ExpenseType @default(STANDARD)
+  
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  month       Month       @relation(fields: [monthId], references: [id], onDelete: Cascade)
+
+  @@index([monthId])
+}
+
+model Investment {
+  id          String   @id @default(cuid())
+  monthId     String
+  description String
+  amount      Decimal  @db.Decimal(10, 2)
+  dayOfMonth  Int?
+  order       Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  month       Month    @relation(fields: [monthId], references: [id], onDelete: Cascade)
+
+  @@index([monthId])
+}
+
+model MiscExpense {
+  id          String   @id @default(cuid())
+  monthId     String
+  description String
+  amount      Decimal  @db.Decimal(10, 2)
+  dayOfMonth  Int?
+  order       Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  month       Month    @relation(fields: [monthId], references: [id], onDelete: Cascade)
+
+  @@index([monthId])
+}
+
+model Plan {
+  id                  String   @id @default(cuid())
+  clerkId             String?  @unique
+  billingSource       String   @default("clerk") // 'clerk' or 'manual'
+  name                String
+  clerkName           String?
+  currency            String?  @default("brl")
+  priceMonthlyCents   Int?
+  priceYearlyCents    Int?
+  description         String?  @db.Text
+  features            String?  @db.Text // JSON string
+  badge               String?
+  highlight           Boolean  @default(false)
+  ctaType             String?  @default("checkout") // 'checkout' or 'contact'
+  ctaLabel            String?
+  ctaUrl              String?
+  active              Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([clerkId])
+  @@index([active])
+}
+
+model StorageObject {
+  id          String   @id @default(cuid())
+  clerkUserId String
+  pathname    String
+  url         String
+  contentType String?
+  size        Int?
+  name        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([clerkUserId])
+  @@index([createdAt])
+}
+
+enum ExpenseType {
+  STANDARD
+  TITHE
+  INVESTMENT_TOTAL
+  MISC_TOTAL
 }

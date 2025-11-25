@@ -1,69 +1,39 @@
-import { auth, createClerkClient } from "@clerk/nextjs/server"
-import { NextResponse } from "next/server"
-import { isAdmin } from "@/lib/admin-utils"
-import { withApiLogging } from "@/lib/logging/api"
+import { NextResponse } from "next/server";
+import { currentUser } from "@clerk/nextjs/server";
+import { createClerkClient } from "@clerk/backend";
+import { isAdmin } from "@/lib/admin-utils";
 
-const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY as string })
-export const runtime = 'nodejs'
+const clerkClient = createClerkClient({
+    secretKey: process.env.CLERK_SECRET_KEY,
+});
 
-async function handleAdminInvitationsGet() {
-  try {
-    const { userId } = await auth()
-    if (!userId || !(await isAdmin(userId))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+export async function GET() {
+    try {
+        const user = await currentUser();
+
+        if (!user || !(await isAdmin(user.id))) {
+            return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        // Get pending invitations from Clerk
+        const invitations = await clerkClient.invitations.getInvitationList({
+            status: ["pending"],
+        });
+
+        return NextResponse.json({
+            invitations: invitations.data.map((inv) => ({
+                id: inv.id,
+                emailAddress: inv.emailAddress,
+                status: inv.status,
+                createdAt: inv.createdAt,
+                updatedAt: inv.updatedAt,
+            })),
+        });
+    } catch (error) {
+        console.error("[ADMIN_INVITATIONS_GET]", error);
+        return new NextResponse(
+            error instanceof Error ? error.message : "Internal Error",
+            { status: 500 }
+        );
     }
-
-    // Fetch invitations; filter to pending/unaccepted
-    const list = await clerk.invitations.getInvitationList({}) as unknown as {
-      data?: Array<{
-        id: string;
-        emailAddress?: string;
-        email_address?: string;
-        status: string;
-        createdAt?: string;
-        created_at?: string;
-        updatedAt?: string;
-        updated_at?: string;
-        expiresAt?: string;
-        expires_at?: string;
-        revoked?: boolean;
-      }>;
-    } | Array<{
-      id: string;
-      emailAddress?: string;
-      email_address?: string;
-      status: string;
-      createdAt?: string;
-      created_at?: string;
-      updatedAt?: string;
-      updated_at?: string;
-      expiresAt?: string;
-      expires_at?: string;
-      revoked?: boolean;
-    }>;
-    const invitations = (Array.isArray(list) ? list : list?.data || [])
-      .filter((inv) => !inv.revoked && inv.status !== 'accepted')
-      .map((inv) => ({
-        id: inv.id,
-        emailAddress: inv.emailAddress || inv.email_address,
-        status: inv.status,
-        createdAt: inv.createdAt || inv.created_at,
-        updatedAt: inv.updatedAt || inv.updated_at,
-        expiresAt: inv.expiresAt || inv.expires_at,
-        revoked: !!inv.revoked,
-      }))
-
-    return NextResponse.json({ invitations })
-  } catch (error: unknown) {
-    console.error('List invitations failed:', error)
-    const err = error as { errors?: Array<{ message?: string }>; message?: string; status?: number };
-    const message = err?.errors?.[0]?.message || err?.message || 'Failed to list invitations'
-    return NextResponse.json({ error: message }, { status: err?.status || 500 })
-  }
 }
-
-export const GET = withApiLogging(handleAdminInvitationsGet, {
-  method: "GET",
-  route: "/api/admin/users/invitations",
-  feature: "admin_users",
-})

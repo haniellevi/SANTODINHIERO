@@ -1,27 +1,57 @@
-"use client";
+"use client"
 
-import { AdminTopbar } from "@/components/admin/admin-topbar";
-import { DevModeBanner } from "@/components/admin/dev-mode-banner";
-import { useAdminDevMode } from "@/contexts/admin-dev-mode";
-import { cn } from "@/lib/utils";
+import { SidebarTrigger } from "@/components/ui/sidebar"
+import { Separator } from "@/components/ui/separator"
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+import { usePathname } from "next/navigation"
 
 export function AdminChrome({ children }: { children: React.ReactNode }) {
-  const { devMode } = useAdminDevMode();
+    const pathname = usePathname()
 
-  return (
-    <div className="relative">
-      <DevModeBanner />
-      <div
-        className={cn(
-          "flex min-h-svh flex-col",
-          devMode ? "pt-12" : ""
-        )}
-      >
-        <AdminTopbar />
-        <main className="flex-1 overflow-y-auto p-6">
-          <div className="container mx-auto max-w-7xl">{children}</div>
-        </main>
-      </div>
-    </div>
-  );
+    const getBreadcrumbs = () => {
+        const segments = pathname.split('/').filter(Boolean)
+        const breadcrumbs = segments.map((segment, index) => {
+            const href = '/' + segments.slice(0, index + 1).join('/')
+            const label = segment.charAt(0).toUpperCase() + segment.slice(1)
+            return { href, label }
+        })
+        return breadcrumbs
+    }
+
+    const breadcrumbs = getBreadcrumbs()
+
+    return (
+        <>
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b border-border px-4">
+                <SidebarTrigger className="-ml-1" />
+                <Separator orientation="vertical" className="mr-2 h-4" />
+                <Breadcrumb>
+                    <BreadcrumbList>
+                        {breadcrumbs.map((crumb, index) => (
+                            <div key={crumb.href} className="flex items-center gap-2">
+                                {index > 0 && <BreadcrumbSeparator />}
+                                <BreadcrumbItem>
+                                    {index === breadcrumbs.length - 1 ? (
+                                        <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                                    ) : (
+                                        <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
+                                    )}
+                                </BreadcrumbItem>
+                            </div>
+                        ))}
+                    </BreadcrumbList>
+                </Breadcrumb>
+            </header>
+            <main className="flex flex-1 flex-col gap-4 p-4 pt-6">
+                {children}
+            </main>
+        </>
+    )
 }

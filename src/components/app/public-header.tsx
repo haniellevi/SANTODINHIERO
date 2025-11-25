@@ -2,16 +2,18 @@
 
 import React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { site } from '@/lib/brand-config'
 
 const menuItems = [
-  { name: 'Recursos', href: '#features' },
-  { name: 'Preços', href: '#pricing' },
-  { name: 'FAQ', href: '#faq' },
-  { name: 'Sobre', href: '/' },
+  { name: 'Recursos', href: '/#features' },
+  { name: 'Preços', href: '/#pricing' },
+  { name: 'FAQ', href: '/faq' },
+  { name: 'Sobre', href: '/about' },
+  { name: 'Contato', href: '/contact' },
 ]
 
 export function PublicHeader() {
@@ -115,39 +117,23 @@ export function PublicHeader() {
 
 const Logo = ({ className }: { className?: string }) => {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 400 100"
-      width="200"
-      height="75"
-      className={className}
-    >
-      <defs>
-        <linearGradient id="stkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#3b82f6" stopOpacity="1" />
-          <stop offset="50%" stopColor="#8b5cf6" stopOpacity="1" />
-          <stop offset="100%" stopColor="#ec4899" stopOpacity="1" />
-        </linearGradient>
-      </defs>
-      <g transform="translate(45, 50)">
-        <circle cx="0" cy="0" r="35" fill="url(#stkGradient)" />
-        {/* Inner dark container */}
-        {/* Play icon */}
-        <polygon points="0,-12 8,10 -8,10" fill="#1a1a1a" />
-      </g>
-      {/* Text with proper font */}
-      <text
-        x="95"
-        y="60"
-        fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
-        fontSize="32"
-        fontWeight="900"
-        fill="currentColor"
-        letterSpacing="-1"
-      >
-        STKV
-        <tspan fill="url(#stkGradient)">2</tspan>
-      </text>
-    </svg>
+    <div className={cn("flex items-center gap-2", className)}>
+      <Image
+        src={site.logo.light || '/logo-light.svg'}
+        alt={site.shortName}
+        width={200}
+        height={60}
+        className="h-12 w-auto dark:hidden"
+        priority
+      />
+      <Image
+        src={site.logo.dark || '/logo-dark.svg'}
+        alt={site.shortName}
+        width={200}
+        height={60}
+        className="hidden h-12 w-auto dark:block"
+        priority
+      />
+    </div>
   )
 }
