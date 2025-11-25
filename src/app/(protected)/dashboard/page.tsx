@@ -8,7 +8,9 @@ import { IncomeCard } from "@/components/dashboard/income-card";
 import { ExpenseCard } from "@/components/dashboard/expense-card";
 import { MonthPlanningAlert } from "@/components/dashboard/month-planning-alert";
 import { RecentTransactionsList, Transaction } from "@/components/dashboard/recent-transactions-list";
-import { FloatingActionButton } from "@/components/dashboard/floating-action-button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UpcomingActionsList } from "@/components/dashboard/upcoming-actions-list";
+
 import { Metadata } from "next";
 import { prisma } from "@/lib/db";
 
@@ -101,10 +103,50 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       </div>
 
       <div className="pt-6 pb-28">
-        <RecentTransactionsList transactions={transactions} />
-      </div>
+        <Tabs defaultValue="upcoming" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="upcoming">Próximas Ações Previstas</TabsTrigger>
+            <TabsTrigger value="pending">Transações Recentes</TabsTrigger>
+          </TabsList>
 
-      <FloatingActionButton />
+          <TabsContent value="upcoming">
+            <UpcomingActionsList
+              actions={[
+                ...currentMonth.incomes.map(i => ({
+                  id: i.id,
+                  type: "income" as const,
+                  description: i.description,
+                  amount: Number(i.amount),
+                  dayOfMonth: i.dayOfMonth
+                })),
+                ...currentMonth.expenses
+                  .filter(e => Number(e.paidAmount) < Number(e.totalAmount)) // Only pending/partial expenses
+                  .map(e => ({
+                    id: e.id,
+                    type: "expense" as const,
+                    description: e.description,
+                    amount: Number(e.totalAmount) - Number(e.paidAmount), // Remaining amount
+                    dayOfMonth: e.dayOfMonth,
+                    status: Number(e.paidAmount) > 0 ? "partial" as const : "pending" as const
+                  })),
+                ...currentMonth.investments.map(i => ({
+                  id: i.id,
+                  type: "investment" as const,
+                  description: i.description,
+                  amount: Number(i.amount),
+                  dayOfMonth: i.dayOfMonth
+                }))
+              ]}
+              currentMonth={month}
+              currentYear={year}
+            />
+          </TabsContent>
+
+          <TabsContent value="pending">
+            <RecentTransactionsList transactions={transactions} />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
