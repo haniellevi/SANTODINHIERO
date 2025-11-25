@@ -35,13 +35,18 @@ export default async function IncomesPage({ searchParams }: IncomesPageProps) {
     const currentMonth = await getOrCreateMonth(dbUser.id, month, year);
 
     return (
-        <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold tracking-tight">Entradas</h1>
+        <div className="container mx-auto p-4 md:p-8 max-w-7xl space-y-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Entradas</h1>
+                    <p className="text-muted-foreground">Gerencie suas fontes de renda</p>
+                </div>
                 <AddIncomeDialog monthId={currentMonth.id} />
             </div>
 
-            <IncomeList incomes={currentMonth.incomes} />
+            <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 p-1">
+                <IncomeList incomes={currentMonth.incomes} />
+            </div>
         </div>
     );
 }

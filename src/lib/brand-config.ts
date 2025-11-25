@@ -25,7 +25,7 @@ export const site = {
   url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   author: 'Rvs Tecnologia',
   keywords: ['Mordomia Cristão', 'Orçamento Familiar', 'Jesus', 'Dinheiro', 'Investimento', 'Gestão Financeira', 'Gastos Avulsos', 'Entradas', 'Saídas', 'Investimentos', 'Prosperidade', 'Inteligência Financeira'],
-  ogImage: '/og-image.png',
+  ogImage: '/og-image-share.png',
   logo: {
     light: '/logo-light.svg',
     dark: '/logo-dark.svg',
@@ -49,6 +49,7 @@ export const site = {
 } as const
 
 export const siteMetadata: Metadata = {
+  metadataBase: new URL(site.url),
   title: site.name,
   description: site.description,
   keywords: [...site.keywords],

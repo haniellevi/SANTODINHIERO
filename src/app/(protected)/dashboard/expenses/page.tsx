@@ -40,19 +40,31 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
     const totalInvestment = currentMonth.investments.reduce((sum, i) => sum + Number(i.amount), 0);
     const totalMisc = currentMonth.miscExpenses.reduce((sum, m) => sum + Number(m.amount), 0);
 
+    // Convert Decimal to number for Client Component
+    const serializedExpenses = currentMonth.expenses.map(expense => ({
+        ...expense,
+        totalAmount: Number(expense.totalAmount),
+        paidAmount: Number(expense.paidAmount),
+    }));
+
     return (
-        <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold tracking-tight">Saídas</h1>
+        <div className="container mx-auto p-4 md:p-8 max-w-7xl space-y-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Saídas</h1>
+                    <p className="text-muted-foreground mt-1">Gerencie seus gastos mensais</p>
+                </div>
                 <AddExpenseDialog monthId={currentMonth.id} />
             </div>
 
-            <ExpenseList
-                expenses={currentMonth.expenses}
-                titheAmount={titheAmount}
-                totalInvestment={totalInvestment}
-                totalMisc={totalMisc}
-            />
+            <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 p-1">
+                <ExpenseList
+                    expenses={serializedExpenses}
+                    titheAmount={titheAmount}
+                    totalInvestment={totalInvestment}
+                    totalMisc={totalMisc}
+                />
+            </div>
         </div>
     );
 }

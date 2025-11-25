@@ -77,8 +77,8 @@ function PlanCard({ plan }: { plan: Plan }) {
     return (
         <Card
             className={`relative flex flex-col h-full transition-all duration-300 hover:scale-105 ${isHighlight
-                ? 'border-primary shadow-xl shadow-primary/20 bg-gradient-to-br from-primary/5 to-transparent'
-                : 'hover:shadow-lg'
+                    ? 'border-primary shadow-xl shadow-primary/20 bg-gradient-to-br from-primary/5 to-transparent'
+                    : 'hover:shadow-lg'
                 }`}
         >
             {plan.badge && (
@@ -172,7 +172,7 @@ export function PricingSection() {
 
     if (isLoading) {
         return (
-            <section className="py-20 px-4">
+            <section id="pricing" className="py-20 px-4">
                 <div className="container mx-auto max-w-6xl">
                     <div className="text-center mb-12">
                         <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -192,7 +192,7 @@ export function PricingSection() {
     }
 
     return (
-        <section className="py-20 px-4 bg-gradient-to-b from-background to-muted/20">
+        <section id="pricing" className="py-20 px-4 bg-gradient-to-b from-background to-muted/20">
             <div className="container mx-auto max-w-6xl">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
@@ -204,10 +204,10 @@ export function PricingSection() {
                 </div>
 
                 <div className={`grid gap-8 ${data.plans.length === 1
-                    ? 'max-w-md mx-auto'
-                    : data.plans.length === 2
-                        ? 'md:grid-cols-2 max-w-4xl mx-auto'
-                        : 'md:grid-cols-2 lg:grid-cols-3'
+                        ? 'max-w-md mx-auto'
+                        : data.plans.length === 2
+                            ? 'md:grid-cols-2 max-w-4xl mx-auto'
+                            : 'md:grid-cols-2 lg:grid-cols-3'
                     }`}>
                     {data.plans.map((plan) => (
                         <PlanCard key={plan.id} plan={plan} />

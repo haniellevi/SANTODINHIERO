@@ -11,8 +11,6 @@ import { site } from '@/lib/brand-config'
 const menuItems = [
   { name: 'Recursos', href: '/#features' },
   { name: 'Preços', href: '/#pricing' },
-  { name: 'FAQ', href: '/faq' },
-  { name: 'Sobre', href: '/about' },
   { name: 'Contato', href: '/contact' },
 ]
 

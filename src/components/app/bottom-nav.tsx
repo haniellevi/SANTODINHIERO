@@ -10,15 +10,15 @@ const navItems = [
         label: "Entradas",
         href: "/dashboard/incomes",
         icon: ArrowUpCircle,
-        activeColor: "text-accent-green",
-        inactiveColor: "text-accent-green/50",
+        activeColor: "text-emerald-500",
+        inactiveColor: "text-emerald-500/70",
     },
     {
         label: "Saídas",
         href: "/dashboard/expenses",
         icon: ArrowDownCircle,
-        activeColor: "text-accent-red",
-        inactiveColor: "text-accent-red/50",
+        activeColor: "text-rose-500",
+        inactiveColor: "text-rose-500/70",
     },
     {
         label: "Investimentos",
@@ -40,8 +40,8 @@ export function BottomNav() {
     const pathname = usePathname();
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface-dark border-t border-border/50">
-            <div className="flex items-center justify-around h-20 px-2">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface-dark/80 backdrop-blur-xl border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
+            <div className="flex items-center justify-around h-24 px-2 pb-4">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href;
                     const Icon = item.icon;
@@ -51,14 +51,27 @@ export function BottomNav() {
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all",
-                                "min-w-[70px]"
+                                "relative flex flex-col items-center justify-center gap-1.5 px-4 py-3 rounded-2xl transition-all duration-300",
+                                "min-w-[80px] group",
+                                isActive
+                                    ? "bg-gradient-to-b from-white/10 to-transparent border border-white/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2)]"
+                                    : "hover:bg-white/5"
                             )}
                         >
-                            <Icon className={cn("h-6 w-6", isActive ? item.activeColor : item.inactiveColor)} />
+                            <div className={cn(
+                                "absolute inset-0 rounded-2xl bg-gradient-to-b from-white/5 to-transparent opacity-0 transition-opacity duration-300",
+                                isActive && "opacity-100"
+                            )} />
+
+                            <Icon className={cn(
+                                "h-6 w-6 relative z-10 transition-transform duration-300 group-hover:scale-110",
+                                isActive ? item.activeColor : item.inactiveColor,
+                                isActive && "drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]"
+                            )} />
+
                             <span
                                 className={cn(
-                                    "text-[10px] font-medium text-center leading-tight",
+                                    "text-[10px] font-medium text-center leading-tight relative z-10",
                                     isActive ? item.activeColor : item.inactiveColor
                                 )}
                             >

@@ -41,13 +41,18 @@ export default async function MiscExpensesPage({ searchParams }: MiscExpensesPag
     }));
 
     return (
-        <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold tracking-tight">Gastos Avulsos</h1>
+        <div className="container mx-auto p-4 md:p-8 max-w-7xl space-y-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Gastos Avulsos</h1>
+                    <p className="text-muted-foreground">Gerencie seus gastos avulsos</p>
+                </div>
                 <AddMiscExpenseDialog monthId={currentMonth.id} />
             </div>
 
-            <MiscExpenseList miscExpenses={serializedMiscExpenses} />
+            <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 p-1">
+                <MiscExpenseList miscExpenses={serializedMiscExpenses} />
+            </div>
         </div>
     );
 }
