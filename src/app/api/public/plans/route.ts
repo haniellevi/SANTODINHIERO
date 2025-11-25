@@ -6,19 +6,17 @@ export const runtime = 'nodejs'
 
 async function handleGetPublicPlans() {
   try {
-    const plans = await db.plan.findMany({ 
-      where: { active: true }, 
+    const plans = await db.plan.findMany({
+      where: { active: true },
       orderBy: [
-        { sortOrder: 'asc' },
-        { credits: 'asc' }
-      ] 
+        { priceMonthlyCents: 'asc' }
+      ]
     })
     return NextResponse.json({
       plans: plans.map(p => ({
         id: p.id,
         clerkId: p.clerkId,
         name: p.name,
-        credits: p.credits,
         currency: p.currency || null,
         priceMonthlyCents: p.priceMonthlyCents ?? null,
         priceYearlyCents: p.priceYearlyCents ?? null,
