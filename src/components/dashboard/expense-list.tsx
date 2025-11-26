@@ -306,7 +306,7 @@ export function ExpenseList({
                     </Table>
                 </div>
 
-                <div className="md:hidden space-y-4">
+                <div className="md:hidden space-y-2">
                     {titheAmount > 0 && (
                         <Card className="bg-gradient-to-r from-yellow-500/10 via-amber-500/5 to-yellow-500/10 border-amber-500/20 shadow-sm border-l-4 border-l-amber-500">
                             <CardContent className="p-3 flex flex-col gap-3">
@@ -363,7 +363,7 @@ export function ExpenseList({
 
                     <Droppable droppableId="expenses-mobile">
                         {(provided) => (
-                            <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
+                            <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
                                 {expenses.map((expense, index) => {
                                     const total = Number(expense.totalAmount);
                                     const paid = Number(expense.paidAmount);
@@ -378,21 +378,21 @@ export function ExpenseList({
                                                     className={cn("bg-card border-none shadow-sm", snapshot.isDragging && "opacity-50")}
                                                     style={provided.draggableProps.style}
                                                 >
-                                                    <CardContent className="p-3 space-y-2">
+                                                    <CardContent className="p-2 space-y-1.5">
                                                         <div className="flex items-start justify-between">
                                                             <div className="flex items-center gap-2">
                                                                 <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-1 hover:bg-muted rounded text-muted-foreground/50">
                                                                     <GripVertical className="h-3.5 w-3.5" />
                                                                 </div>
                                                                 <div>
-                                                                    <p className="font-medium line-clamp-1 text-sm">{expense.description}</p>
+                                                                    <p className="font-medium line-clamp-1 text-xs">{expense.description}</p>
                                                                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
                                                                         <Calendar className="h-2.5 w-2.5" />
                                                                         <span>Dia {expense.dayOfMonth || "-"}</span>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <p className="font-bold text-base text-rose-500">{formatCurrency(total)}</p>
+                                                            <p className="font-bold text-sm text-rose-500">{formatCurrency(total)}</p>
                                                         </div>
 
                                                         <div className="space-y-1">
