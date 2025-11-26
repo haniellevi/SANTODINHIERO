@@ -80,12 +80,12 @@ export function IncomeList({ incomes: initialIncomes }: IncomeListProps) {
                 <Table className="border-separate border-spacing-y-3">
                     <TableHeader>
                         <TableRow className="hover:bg-transparent border-none">
-                            <TableHead className="w-[40px] text-muted-foreground font-medium">#</TableHead>
+                            <TableHead className="w-[40px] text-muted-foreground font-medium pl-4">#</TableHead>
                             <TableHead className="w-[40px]"></TableHead>
                             <TableHead className="text-muted-foreground font-medium">Descrição</TableHead>
                             <TableHead className="text-muted-foreground font-medium">Dia</TableHead>
                             <TableHead className="text-right text-muted-foreground font-medium">Valor</TableHead>
-                            <TableHead className="w-[100px] text-muted-foreground font-medium">Ações</TableHead>
+                            <TableHead className="w-[100px] text-muted-foreground font-medium pr-4">Ações</TableHead>
                         </TableRow>
                     </TableHeader>
                     <Droppable droppableId="incomes-desktop">
@@ -97,32 +97,39 @@ export function IncomeList({ incomes: initialIncomes }: IncomeListProps) {
                                             <TableRow
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
-                                                className={`bg-card hover:bg-card/80 transition-colors border-none rounded-lg shadow-sm group ${snapshot.isDragging ? "opacity-50" : ""}`}
+                                                className={`bg-card/50 hover:bg-card/80 backdrop-blur-sm transition-all border-none rounded-xl shadow-sm group ${snapshot.isDragging ? "opacity-50 shadow-lg ring-2 ring-emerald-500/20" : "hover:shadow-md hover:ring-1 hover:ring-white/5"}`}
                                                 style={{
                                                     ...provided.draggableProps.style,
                                                     display: snapshot.isDragging ? "table" : undefined,
                                                 }}
                                             >
-                                                <TableCell className="rounded-l-lg border-y border-l border-border/50 text-muted-foreground/50 text-xs">
+                                                <TableCell className="rounded-l-xl border-y border-l border-white/5 text-muted-foreground/50 text-xs pl-4">
                                                     {index + 1}
                                                 </TableCell>
-                                                <TableCell className="border-y border-border/50">
-                                                    <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-2 hover:bg-muted rounded transition-colors w-fit mx-auto touch-none">
+                                                <TableCell className="border-y border-white/5">
+                                                    <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-2 hover:bg-white/5 rounded-lg transition-colors w-fit mx-auto touch-none">
                                                         <GripVertical className="h-4 w-4 text-muted-foreground/50 group-hover:text-muted-foreground" />
                                                     </div>
                                                 </TableCell>
-                                                <TableCell className="font-medium border-y border-border/50 whitespace-normal min-w-[150px]">{income.description}</TableCell>
-                                                <TableCell className="border-y border-border/50">{income.dayOfMonth || "-"}</TableCell>
-                                                <TableCell className="text-right text-emerald-500 font-bold text-lg border-y border-border/50">
-                                                    {formatCurrency(Number(income.amount))}
+                                                <TableCell className="font-medium border-y border-white/5 whitespace-normal min-w-[150px] text-foreground/90">{income.description}</TableCell>
+                                                <TableCell className="border-y border-white/5">
+                                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                                        <Calendar className="h-3.5 w-3.5 opacity-70" />
+                                                        <span>{income.dayOfMonth || "-"}</span>
+                                                    </div>
                                                 </TableCell>
-                                                <TableCell className="rounded-r-lg border-y border-r border-border/50">
-                                                    <div className="flex items-center justify-end gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                                <TableCell className="text-right font-bold text-lg border-y border-white/5">
+                                                    <span className="text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-md">
+                                                        {formatCurrency(Number(income.amount))}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell className="rounded-r-xl border-y border-r border-white/5 pr-4">
+                                                    <div className="flex items-center justify-end gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200">
                                                         <EditIncomeDialog income={income} />
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                                            className="h-8 w-8 text-muted-foreground hover:text-red-400 hover:bg-red-400/10 rounded-lg"
                                                             onClick={() => handleDelete(income.id)}
                                                         >
                                                             <Trash2 className="h-4 w-4" />
@@ -140,7 +147,7 @@ export function IncomeList({ incomes: initialIncomes }: IncomeListProps) {
                 </Table>
             </div>
 
-            <div className="md:hidden space-y-4">
+            <div className="md:hidden space-y-4 pb-20">
                 <Droppable droppableId="incomes-mobile">
                     {(provided) => (
                         <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
@@ -150,39 +157,42 @@ export function IncomeList({ incomes: initialIncomes }: IncomeListProps) {
                                         <Card
                                             ref={provided.innerRef}
                                             {...provided.draggableProps}
-                                            className={cn("bg-card border-none shadow-sm", snapshot.isDragging && "opacity-50")}
+                                            className={cn(
+                                                "bg-card/80 backdrop-blur-xl border-white/5 shadow-sm overflow-hidden transition-all",
+                                                "border-l-[3px] border-l-emerald-500",
+                                                snapshot.isDragging ? "opacity-50 scale-95 ring-2 ring-emerald-500/20" : "active:scale-[0.98]"
+                                            )}
                                             style={provided.draggableProps.style}
                                         >
-                                            <CardContent className="p-4 space-y-3">
-                                                <div className="flex items-start justify-between">
-                                                    <div className="flex items-center gap-3">
-                                                        <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-1.5 hover:bg-muted rounded text-muted-foreground/50">
-                                                            <GripVertical className="h-4 w-4" />
+                                            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-transparent pointer-events-none" />
+                                            <CardContent className="p-2 relative">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                        <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-1 hover:bg-white/5 rounded text-muted-foreground/40 shrink-0">
+                                                            <GripVertical className="h-3.5 w-3.5" />
                                                         </div>
-                                                        <div>
-                                                            <p className="font-medium line-clamp-1">{income.description}</p>
-                                                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                                                                <Calendar className="h-3 w-3" />
+                                                        <div className="min-w-0 flex-1">
+                                                            <div className="flex items-baseline justify-between gap-2">
+                                                                <p className="font-semibold text-foreground/90 truncate text-xs">{income.description}</p>
+                                                                <p className="font-bold text-base text-emerald-500 shrink-0">{formatCurrency(Number(income.amount))}</p>
+                                                            </div>
+                                                            <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5">
+                                                                <Calendar className="h-2.5 w-2.5" />
                                                                 <span>Dia {income.dayOfMonth || "-"}</span>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-1">
+                                                    <div className="flex items-center gap-0.5 shrink-0">
                                                         <EditIncomeDialog income={income} />
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                                            className="h-7 w-7 text-muted-foreground/70 hover:text-red-400 hover:bg-red-400/10 rounded-lg"
                                                             onClick={() => handleDelete(income.id)}
                                                         >
-                                                            <Trash2 className="h-4 w-4" />
+                                                            <Trash2 className="h-3.5 w-3.5" />
                                                         </Button>
                                                     </div>
-                                                </div>
-
-                                                <div className="flex items-center justify-between pt-2 border-t border-border/50">
-                                                    <span className="text-xs text-muted-foreground">Valor</span>
-                                                    <p className="font-bold text-lg text-emerald-500">{formatCurrency(Number(income.amount))}</p>
                                                 </div>
                                             </CardContent>
                                         </Card>

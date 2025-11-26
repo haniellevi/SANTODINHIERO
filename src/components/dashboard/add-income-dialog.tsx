@@ -47,60 +47,62 @@ export function AddIncomeDialog({ monthId }: AddIncomeDialogProps) {
                     Adicionar Entrada
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
+            <DialogContent className="sm:max-w-[425px] max-h-[85vh] flex flex-col">
+                <DialogHeader className="flex-shrink-0">
                     <DialogTitle>Nova Entrada</DialogTitle>
                     <DialogDescription>
                         Adicione uma nova entrada de dinheiro para este mês.
                     </DialogDescription>
                 </DialogHeader>
-                <form action={handleSubmit} className="grid gap-4 py-4">
-                    <input type="hidden" name="monthId" value={monthId} />
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="description" className="text-right">
-                            Descrição
-                        </Label>
-                        <Input
-                            id="description"
-                            name="description"
-                            placeholder="Ex: Salário"
-                            className="col-span-3"
-                            required
-                        />
+                <form action={handleSubmit} className="flex-1 overflow-y-auto">
+                    <div className="grid gap-4 py-4">
+                        <input type="hidden" name="monthId" value={monthId} />
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="description" className="text-right">
+                                Descrição
+                            </Label>
+                            <Input
+                                id="description"
+                                name="description"
+                                placeholder="Ex: Salário"
+                                className="col-span-3"
+                                required
+                            />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="amount" className="text-right">
+                                Valor
+                            </Label>
+                            <Input
+                                id="amount"
+                                name="amount"
+                                type="number"
+                                step="0.01"
+                                placeholder="0,00"
+                                className="col-span-3"
+                                required
+                            />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="dayOfMonth" className="text-right">
+                                Dia
+                            </Label>
+                            <Input
+                                id="dayOfMonth"
+                                name="dayOfMonth"
+                                type="number"
+                                min="1"
+                                max="31"
+                                placeholder="Dia do recebimento"
+                                className="col-span-3"
+                            />
+                        </div>
+                        <DialogFooter className="flex-shrink-0 pt-4 sticky bottom-0 bg-background">
+                            <Button type="submit" disabled={loading}>
+                                {loading ? "Salvando..." : "Salvar Entrada"}
+                            </Button>
+                        </DialogFooter>
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="amount" className="text-right">
-                            Valor
-                        </Label>
-                        <Input
-                            id="amount"
-                            name="amount"
-                            type="number"
-                            step="0.01"
-                            placeholder="0,00"
-                            className="col-span-3"
-                            required
-                        />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="dayOfMonth" className="text-right">
-                            Dia
-                        </Label>
-                        <Input
-                            id="dayOfMonth"
-                            name="dayOfMonth"
-                            type="number"
-                            min="1"
-                            max="31"
-                            placeholder="Dia do recebimento"
-                            className="col-span-3"
-                        />
-                    </div>
-                    <DialogFooter>
-                        <Button type="submit" disabled={loading}>
-                            {loading ? "Salvando..." : "Salvar Entrada"}
-                        </Button>
-                    </DialogFooter>
                 </form>
             </DialogContent>
         </Dialog>
