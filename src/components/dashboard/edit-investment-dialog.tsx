@@ -19,7 +19,9 @@ import { toast } from "sonner";
 import { MonthWithDetails } from "@/lib/queries/finance";
 
 interface EditInvestmentDialogProps {
-    investment: MonthWithDetails["investments"][number];
+    investment: Omit<MonthWithDetails["investments"][number], "amount"> & {
+        amount: number | MonthWithDetails["investments"][number]["amount"];
+    };
 }
 
 export function EditInvestmentDialog({ investment }: EditInvestmentDialogProps) {

@@ -19,7 +19,9 @@ import { toast } from "sonner";
 import { MonthWithDetails } from "@/lib/queries/finance";
 
 interface EditIncomeDialogProps {
-    income: MonthWithDetails["incomes"][number];
+    income: Omit<MonthWithDetails["incomes"][number], "amount"> & {
+        amount: number | MonthWithDetails["incomes"][number]["amount"];
+    };
 }
 
 export function EditIncomeDialog({ income }: EditIncomeDialogProps) {

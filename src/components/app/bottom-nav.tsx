@@ -25,14 +25,14 @@ const navItems = [
         href: "/dashboard/investments",
         icon: TrendingUp,
         activeColor: "text-blue-400",
-        inactiveColor: "text-blue-400/50",
+        inactiveColor: "text-blue-400/70",
     },
     {
         label: "Gastos Avulsos",
         href: "/dashboard/misc-expenses",
         icon: Receipt,
         activeColor: "text-yellow-400",
-        inactiveColor: "text-yellow-400/50",
+        inactiveColor: "text-yellow-400/70",
     },
 ];
 

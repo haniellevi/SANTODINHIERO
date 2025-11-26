@@ -40,6 +40,8 @@ model Month {
   month     Int
   year      Int
   isOpen    Boolean  @default(true)
+  isTithePaid Boolean @default(false)
+  tithePaidAmount Decimal @default(0) @db.Decimal(10, 2)
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -62,6 +64,7 @@ model Income {
   amount      Decimal  @db.Decimal(10, 2)
   dayOfMonth  Int?
   order       Int      @default(0)
+  isReceived  Boolean  @default(false)
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -80,6 +83,7 @@ model Expense {
   dayOfMonth  Int?
   order       Int         @default(0)
   type        ExpenseType @default(STANDARD)
+  isPaid      Boolean     @default(false)
   
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
@@ -96,6 +100,7 @@ model Investment {
   amount      Decimal  @db.Decimal(10, 2)
   dayOfMonth  Int?
   order       Int      @default(0)
+  isPaid      Boolean  @default(false)
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -112,6 +117,7 @@ model MiscExpense {
   amount      Decimal  @db.Decimal(10, 2)
   dayOfMonth  Int?
   order       Int      @default(0)
+  isPaid      Boolean  @default(false)
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

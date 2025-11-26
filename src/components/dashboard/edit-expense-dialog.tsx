@@ -19,7 +19,10 @@ import { toast } from "sonner";
 import { MonthWithDetails } from "@/lib/queries/finance";
 
 interface EditExpenseDialogProps {
-    expense: MonthWithDetails["expenses"][number];
+    expense: Omit<MonthWithDetails["expenses"][number], "totalAmount" | "paidAmount"> & {
+        totalAmount: number | MonthWithDetails["expenses"][number]["totalAmount"];
+        paidAmount: number | MonthWithDetails["expenses"][number]["paidAmount"];
+    };
 }
 
 export function EditExpenseDialog({ expense }: EditExpenseDialogProps) {

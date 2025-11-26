@@ -19,7 +19,9 @@ import { toast } from "sonner";
 import { MonthWithDetails } from "@/lib/queries/finance";
 
 interface EditMiscExpenseDialogProps {
-    miscExpense: MonthWithDetails["miscExpenses"][number];
+    miscExpense: Omit<MonthWithDetails["miscExpenses"][number], "amount"> & {
+        amount: number | MonthWithDetails["miscExpenses"][number]["amount"];
+    };
 }
 
 export function EditMiscExpenseDialog({ miscExpense }: EditMiscExpenseDialogProps) {

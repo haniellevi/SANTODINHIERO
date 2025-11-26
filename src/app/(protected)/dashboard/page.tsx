@@ -71,12 +71,19 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   const totals = calculateTotals(currentMonth);
 
-  // Combine transactions
+  const currentDay = new Date().getDate();
+  const predictedBalance =
+    currentMonth.incomes.filter(i => i.isReceived).reduce((acc, curr) => acc + Number(curr.amount), 0) -
+    currentMonth.expenses.reduce((acc, curr) => acc + Number(curr.paidAmount), 0) -
+    currentMonth.investments.filter(i => i.isPaid).reduce((acc, curr) => acc + Number(curr.amount), 0) -
+    currentMonth.miscExpenses.filter(m => m.isPaid).reduce((acc, curr) => acc + Number(curr.amount), 0);
+
+  // Combine transactions - use updatedAt to show recent pay/receive actions
   const transactions: Transaction[] = [
-    ...currentMonth.incomes.map(i => ({ id: i.id, type: "income" as const, description: i.description, amount: Number(i.amount), date: i.createdAt })),
-    ...currentMonth.expenses.map(e => ({ id: e.id, type: "expense" as const, description: e.description, amount: Number(e.totalAmount), date: e.createdAt })),
-    ...currentMonth.investments.map(i => ({ id: i.id, type: "investment" as const, description: i.description, amount: Number(i.amount), date: i.createdAt })),
-    ...currentMonth.miscExpenses.map(m => ({ id: m.id, type: "misc" as const, description: m.description, amount: Number(m.amount), date: m.createdAt })),
+    ...currentMonth.incomes.map(i => ({ id: i.id, type: "income" as const, description: i.description, amount: Number(i.amount), date: i.updatedAt })),
+    ...currentMonth.expenses.map(e => ({ id: e.id, type: "expense" as const, description: e.description, amount: Number(e.totalAmount), date: e.updatedAt })),
+    ...currentMonth.investments.map(i => ({ id: i.id, type: "investment" as const, description: i.description, amount: Number(i.amount), date: i.updatedAt })),
+    ...currentMonth.miscExpenses.map(m => ({ id: m.id, type: "misc" as const, description: m.description, amount: Number(m.amount), date: m.updatedAt })),
   ].sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
     .slice(0, 10); // Show last 10
 
@@ -87,10 +94,16 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       <MonthNavigationHeader currentDate={currentDate} availableMonths={availableMonths} />
 
       <div className="flex flex-col items-center justify-center py-8">
-        <h1 className={`text-5xl font-bold tracking-tighter ${totals.balance > 0 ? "text-emerald-500" : totals.balance < 0 ? "text-red-500" : "text-white"}`}>
+        <h1 className={`text-5xl font-bold tracking-tighter ${totals.balance > 0 ? "text-emerald-500" : totals.balance < 0 ? "text-red-500" : "text-foreground"}`}>
           {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totals.balance)}
         </h1>
         <p className="mt-2 text-sm font-medium text-muted-foreground uppercase tracking-widest">Saldo do Mês</p>
+
+        <div className={`mt-6 px-6 py-3 rounded-full border backdrop-blur-sm ${predictedBalance >= 0 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" : "bg-red-500/10 border-red-500/20 text-red-500"}`}>
+          <p className="text-sm font-semibold tracking-wide">
+            HOJE É DIA {currentDay} — SEU SALDO PREVISTO É {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(predictedBalance)}
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -107,13 +120,13 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/20 p-1 rounded-xl">
             <TabsTrigger
               value="upcoming"
-              className="rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white font-semibold transition-all"
+              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold transition-all"
             >
               Próximas
             </TabsTrigger>
             <TabsTrigger
               value="pending"
-              className="rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white font-semibold transition-all"
+              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold transition-all"
             >
               Recentes
             </TabsTrigger>

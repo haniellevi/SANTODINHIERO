@@ -37,8 +37,18 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
     // Calculate totals for virtual rows
     const totalIncome = currentMonth.incomes.reduce((sum, i) => sum + Number(i.amount), 0);
     const titheAmount = totalIncome * 0.1;
+
+    // Calculate total and paid amounts for investments
     const totalInvestment = currentMonth.investments.reduce((sum, i) => sum + Number(i.amount), 0);
+    const totalInvestmentPaid = currentMonth.investments
+        .filter(i => i.isPaid)
+        .reduce((sum, i) => sum + Number(i.amount), 0);
+
+    // Calculate total and paid amounts for misc expenses
     const totalMisc = currentMonth.miscExpenses.reduce((sum, m) => sum + Number(m.amount), 0);
+    const totalMiscPaid = currentMonth.miscExpenses
+        .filter(m => m.isPaid)
+        .reduce((sum, m) => sum + Number(m.amount), 0);
 
     // Convert Decimal to number for Client Component
     const serializedExpenses = currentMonth.expenses.map(expense => ({
@@ -62,7 +72,11 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
                     expenses={serializedExpenses}
                     titheAmount={titheAmount}
                     totalInvestment={totalInvestment}
+                    totalInvestmentPaid={totalInvestmentPaid}
                     totalMisc={totalMisc}
+                    totalMiscPaid={totalMiscPaid}
+                    isTithePaid={currentMonth.isTithePaid}
+                    monthId={currentMonth.id}
                 />
             </div>
         </div>

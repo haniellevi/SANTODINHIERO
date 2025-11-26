@@ -367,3 +367,75 @@ export async function duplicateMonth(formData: FormData) {
 
     revalidatePath("/dashboard");
 }
+
+
+// Toggle status actions
+export async function toggleIncomeReceived(id: string, isReceived: boolean) {
+    await prisma.income.update({
+        where: { id },
+        data: { isReceived },
+    });
+    revalidatePath("/dashboard");
+}
+
+export async function toggleExpensePaid(id: string, isPaid: boolean) {
+    // Get the expense to access totalAmount
+    const expense = await prisma.expense.findUnique({
+        where: { id },
+        select: { totalAmount: true, paidAmount: true },
+    });
+
+    if (!expense) {
+        throw new Error("Despesa não encontrada");
+    }
+
+    // When marking as paid, set paidAmount to totalAmount
+    // When unmarking, set paidAmount to 0
+    await prisma.expense.update({
+        where: { id },
+        data: {
+            isPaid,
+            paidAmount: isPaid ? expense.totalAmount : 0,
+        },
+    });
+    revalidatePath("/dashboard");
+}
+
+export async function toggleTithePaid(monthId: string, isPaid: boolean) {
+    const month = await prisma.month.findUnique({
+        where: { id: monthId },
+        include: { incomes: true }
+    });
+
+    if (!month) throw new Error("Mês não encontrado");
+
+    const totalIncome = month.incomes.reduce((sum, i) => sum + Number(i.amount), 0);
+    const titheAmount = totalIncome * 0.1;
+
+    await prisma.month.update({
+        where: { id: monthId },
+        data: {
+            isTithePaid: isPaid,
+            tithePaidAmount: isPaid ? titheAmount : 0
+        }
+    });
+
+    revalidatePath("/dashboard");
+}
+
+export async function toggleInvestmentPaid(id: string, isPaid: boolean) {
+    await prisma.investment.update({
+        where: { id },
+        data: { isPaid },
+    });
+    revalidatePath("/dashboard");
+}
+
+export async function toggleMiscExpensePaid(id: string, isPaid: boolean) {
+    await prisma.miscExpense.update({
+        where: { id },
+        data: { isPaid },
+    });
+    revalidatePath("/dashboard");
+}
+

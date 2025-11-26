@@ -65,14 +65,14 @@ export function MonthNavigationHeader({
                 size="icon"
                 onClick={() => handleNavigation("prev")}
                 disabled={!hasPrevMonth}
-                className="size-10 rounded-full bg-white/5 hover:bg-white/10 text-white disabled:opacity-30"
+                className="size-10 rounded-full hover:bg-accent text-primary disabled:opacity-30"
             >
                 <ChevronLeft className="h-5 w-5" />
                 <span className="sr-only">Mês anterior</span>
             </Button>
 
             <div className="flex flex-col items-center">
-                <h2 className="text-xl font-bold capitalize tracking-tight text-white">
+                <h2 className="text-xl font-bold capitalize tracking-tight text-primary">
                     {formattedDate}
                 </h2>
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -85,7 +85,7 @@ export function MonthNavigationHeader({
                 size="icon"
                 onClick={() => handleNavigation("next")}
                 disabled={!hasNextMonth}
-                className="size-10 rounded-full bg-white/5 hover:bg-white/10 text-white disabled:opacity-30"
+                className="size-10 rounded-full hover:bg-accent text-primary disabled:opacity-30"
             >
                 <ChevronRight className="h-5 w-5" />
                 <span className="sr-only">Próximo mês</span>

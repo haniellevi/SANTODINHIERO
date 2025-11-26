@@ -34,7 +34,7 @@ export function Topbar() {
             />
           </div>
           <div className="flex flex-col">
-            <span className="text-lg font-bold text-primary whitespace-nowrap">
+            <span className="text-lg font-bold text-primary dark:brand-gradient whitespace-nowrap">
               Santo Dinheiro
             </span>
             <span className="text-[10px] text-muted-foreground tracking-wider whitespace-nowrap">Finanças Protegidas</span>

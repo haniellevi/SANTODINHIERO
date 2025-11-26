@@ -429,3 +429,10 @@
 .cl-internal-1fooy5r {
   z-index: 21;
 }
+/* Brand gradient for dark mode */
+.brand-gradient {
+  background: linear-gradient(135deg, #05aee5 0%, #09e3c7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

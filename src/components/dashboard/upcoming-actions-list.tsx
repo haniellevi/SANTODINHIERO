@@ -62,7 +62,7 @@ export function UpcomingActionsList({ actions, currentMonth, currentYear }: Upco
     return (
         <Card className="col-span-1 border-none bg-transparent shadow-none">
             <CardHeader className="px-0 pt-0">
-                <CardTitle className="flex items-center gap-2 text-lg font-bold text-white">
+                <CardTitle className="flex items-center gap-2 text-lg font-bold text-foreground">
                     <Calendar className="h-5 w-5 text-emerald-500" />
                     Próximas Ações
                 </CardTitle>
@@ -70,14 +70,14 @@ export function UpcomingActionsList({ actions, currentMonth, currentYear }: Upco
             <CardContent className="px-0">
                 <div className="space-y-2">
                     {sortedActions.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-white/10 py-12 text-center">
+                        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-12 text-center">
                             <p className="text-sm text-muted-foreground">Nenhuma ação prevista.</p>
                         </div>
                     ) : (
                         sortedActions.map((action) => (
                             <div
                                 key={`${action.type}-${action.id}`}
-                                className="group flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-card/50 p-3 transition-all hover:bg-card hover:border-white/10"
+                                className="group flex items-center justify-between gap-3 rounded-xl border border-border bg-card/50 p-3 transition-all hover:bg-card hover:border-border/80"
                             >
                                 <div className="flex items-center gap-3 overflow-hidden">
                                     <div className={cn("flex size-10 shrink-0 items-center justify-center rounded-full transition-colors",
@@ -88,9 +88,9 @@ export function UpcomingActionsList({ actions, currentMonth, currentYear }: Upco
                                         {getIcon(action.type)}
                                     </div>
                                     <div className="flex flex-col truncate">
-                                        <p className="truncate text-sm font-semibold text-white/90">{action.description}</p>
+                                        <p className="truncate text-sm font-semibold text-foreground/90">{action.description}</p>
                                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                            <span className="font-medium text-emerald-400">Dia {action.dayOfMonth || "?"}</span>
+                                            <span className="font-medium text-emerald-500">Dia {action.dayOfMonth || "?"}</span>
                                             <span>•</span>
                                             <span>{getTypeLabel(action.type)}</span>
                                         </div>
