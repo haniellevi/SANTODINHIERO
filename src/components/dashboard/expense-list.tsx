@@ -22,8 +22,13 @@ import { EmptyState } from "./empty-state";
 import { EditExpenseDialog } from "./edit-expense-dialog";
 import { cn } from "@/lib/utils";
 
+type SerializedExpense = Omit<MonthWithDetails["expenses"][number], "totalAmount" | "paidAmount"> & {
+    totalAmount: number;
+    paidAmount: number;
+};
+
 interface ExpenseListProps {
-    expenses: MonthWithDetails["expenses"];
+    expenses: SerializedExpense[];
     titheAmount: number;
     totalInvestment: number;
     totalMisc: number;

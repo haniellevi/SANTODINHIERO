@@ -21,8 +21,10 @@ import { EmptyState } from "./empty-state";
 import { EditInvestmentDialog } from "./edit-investment-dialog";
 import { cn } from "@/lib/utils";
 
+type SerializedInvestment = Omit<MonthWithDetails["investments"][number], "amount"> & { amount: number };
+
 interface InvestmentListProps {
-    investments: MonthWithDetails["investments"];
+    investments: SerializedInvestment[];
 }
 
 export function InvestmentList({ investments: initialInvestments }: InvestmentListProps) {

@@ -21,8 +21,10 @@ import { EmptyState } from "./empty-state";
 import { EditMiscExpenseDialog } from "./edit-misc-expense-dialog";
 import { cn } from "@/lib/utils";
 
+type SerializedMiscExpense = Omit<MonthWithDetails["miscExpenses"][number], "amount"> & { amount: number };
+
 interface MiscExpenseListProps {
-    miscExpenses: MonthWithDetails["miscExpenses"];
+    miscExpenses: SerializedMiscExpense[];
 }
 
 export function MiscExpenseList({ miscExpenses: initialMiscExpenses }: MiscExpenseListProps) {

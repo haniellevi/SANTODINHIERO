@@ -21,8 +21,10 @@ import { EmptyState } from "./empty-state";
 import { EditIncomeDialog } from "./edit-income-dialog";
 import { cn } from "@/lib/utils";
 
+type SerializedIncome = Omit<MonthWithDetails["incomes"][number], "amount"> & { amount: number };
+
 interface IncomeListProps {
-    incomes: MonthWithDetails["incomes"];
+    incomes: SerializedIncome[];
 }
 
 export function IncomeList({ incomes: initialIncomes }: IncomeListProps) {

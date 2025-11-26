@@ -34,6 +34,12 @@ export default async function IncomesPage({ searchParams }: IncomesPageProps) {
 
     const currentMonth = await getOrCreateMonth(dbUser.id, month, year);
 
+    // Serialize Decimal objects to numbers for client components
+    const serializedIncomes = currentMonth.incomes.map(income => ({
+        ...income,
+        amount: Number(income.amount),
+    }));
+
     return (
         <div className="container mx-auto p-4 md:p-8 max-w-7xl space-y-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -45,7 +51,7 @@ export default async function IncomesPage({ searchParams }: IncomesPageProps) {
             </div>
 
             <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 p-1">
-                <IncomeList incomes={currentMonth.incomes} />
+                <IncomeList incomes={serializedIncomes} />
             </div>
         </div>
     );
