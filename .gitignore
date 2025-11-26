@@ -47,4 +47,5 @@ prisma/generated/
 *.log
 *.sql
 _backups/
+backups/
 __pycache__/
