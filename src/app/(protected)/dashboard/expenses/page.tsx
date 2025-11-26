@@ -57,6 +57,16 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
         paidAmount: Number(expense.paidAmount),
     }));
 
+    const serializedInvestments = currentMonth.investments.map(inv => ({
+        ...inv,
+        amount: Number(inv.amount),
+    }));
+
+    const serializedMiscExpenses = currentMonth.miscExpenses.map(misc => ({
+        ...misc,
+        amount: Number(misc.amount),
+    }));
+
     return (
         <div className="container mx-auto p-4 md:p-8 max-w-7xl space-y-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -70,6 +80,8 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
             <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 p-1">
                 <ExpenseList
                     expenses={serializedExpenses}
+                    investments={serializedInvestments}
+                    miscExpenses={serializedMiscExpenses}
                     titheAmount={titheAmount}
                     totalInvestment={totalInvestment}
                     totalInvestmentPaid={totalInvestmentPaid}

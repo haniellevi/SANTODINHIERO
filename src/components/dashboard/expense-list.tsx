@@ -29,8 +29,18 @@ type SerializedExpense = Omit<MonthWithDetails["expenses"][number], "totalAmount
     paidAmount: number;
 };
 
+type SerializedInvestment = Omit<MonthWithDetails["investments"][number], "amount"> & {
+    amount: number;
+};
+
+type SerializedMiscExpense = Omit<MonthWithDetails["miscExpenses"][number], "amount"> & {
+    amount: number;
+};
+
 interface ExpenseListProps {
     expenses: SerializedExpense[];
+    investments: SerializedInvestment[];
+    miscExpenses: SerializedMiscExpense[];
     titheAmount: number;
     totalInvestment: number;
     totalInvestmentPaid: number;
@@ -42,6 +52,8 @@ interface ExpenseListProps {
 
 export function ExpenseList({
     expenses: initialExpenses,
+    investments,
+    miscExpenses,
     titheAmount,
     totalInvestment,
     totalInvestmentPaid,
@@ -60,10 +72,23 @@ export function ExpenseList({
 
     const currentDay = new Date().getDate();
 
+    // Calculate investments and misc expenses up to today
+    const investmentsUpToToday = investments
+        .filter(i => (i.dayOfMonth || 32) <= currentDay)
+        .reduce((sum, i) => sum + i.amount, 0);
+
+    const miscExpensesUpToToday = miscExpenses
+        .filter(m => (m.dayOfMonth || 32) <= currentDay)
+        .reduce((sum, m) => sum + m.amount, 0);
+
     // Include ALL totals (expenses + tithe + investments + misc) for accurate calculations
+    // For "up to today", only include items with dayOfMonth <= currentDay
+    // Tithe has no dayOfMonth, so we include it in totalOverall but NOT in totalUpToToday
     const totalUpToToday = expenses
         .filter(e => (e.dayOfMonth || 32) <= currentDay)
-        .reduce((acc, curr) => acc + Number(curr.totalAmount), 0) + titheAmount + totalInvestment + totalMisc;
+        .reduce((acc, curr) => acc + Number(curr.totalAmount), 0)
+        + investmentsUpToToday
+        + miscExpensesUpToToday;
 
     // Sum paid amounts including tithe (if paid), investments and misc
     const totalPaid = expenses.reduce((acc, curr) => acc + Number(curr.paidAmount), 0)
