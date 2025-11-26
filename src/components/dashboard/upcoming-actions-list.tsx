@@ -60,42 +60,44 @@ export function UpcomingActionsList({ actions, currentMonth, currentYear }: Upco
     };
 
     return (
-        <Card className="col-span-1">
-            <CardHeader>
-                <CardTitle className="text-lg font-medium flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-muted-foreground" />
-                    Próximas Ações Previstas
+        <Card className="col-span-1 border-none bg-transparent shadow-none">
+            <CardHeader className="px-0 pt-0">
+                <CardTitle className="flex items-center gap-2 text-lg font-bold text-white">
+                    <Calendar className="h-5 w-5 text-emerald-500" />
+                    Próximas Ações
                 </CardTitle>
             </CardHeader>
-            <CardContent>
-                <div className="space-y-4">
+            <CardContent className="px-0">
+                <div className="space-y-2">
                     {sortedActions.length === 0 ? (
-                        <p className="text-sm text-muted-foreground text-center py-4">Nenhuma ação prevista para este mês.</p>
+                        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-white/10 py-12 text-center">
+                            <p className="text-sm text-muted-foreground">Nenhuma ação prevista.</p>
+                        </div>
                     ) : (
                         sortedActions.map((action) => (
                             <div
                                 key={`${action.type}-${action.id}`}
-                                className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                                className="group flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-card/50 p-3 transition-all hover:bg-card hover:border-white/10"
                             >
-                                <div className="flex items-center gap-3">
-                                    <div className={cn("p-2 rounded-full bg-muted/50",
-                                        action.type === "income" && "bg-emerald-500/10",
-                                        action.type === "expense" && "bg-rose-500/10",
-                                        action.type === "investment" && "bg-blue-500/10"
+                                <div className="flex items-center gap-3 overflow-hidden">
+                                    <div className={cn("flex size-10 shrink-0 items-center justify-center rounded-full transition-colors",
+                                        action.type === "income" && "bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500/20",
+                                        action.type === "expense" && "bg-rose-500/10 text-rose-500 group-hover:bg-rose-500/20",
+                                        action.type === "investment" && "bg-blue-500/10 text-blue-500 group-hover:bg-blue-500/20"
                                     )}>
                                         {getIcon(action.type)}
                                     </div>
-                                    <div className="space-y-1">
-                                        <p className="text-sm font-medium leading-none">{action.description}</p>
+                                    <div className="flex flex-col truncate">
+                                        <p className="truncate text-sm font-semibold text-white/90">{action.description}</p>
                                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                            <span>{getTypeLabel(action.type)}</span>
+                                            <span className="font-medium text-emerald-400">Dia {action.dayOfMonth || "?"}</span>
                                             <span>•</span>
-                                            <span>Dia {action.dayOfMonth || "?"}</span>
+                                            <span>{getTypeLabel(action.type)}</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="flex flex-col items-end gap-1">
-                                    <span className={cn("font-bold",
+                                    <span className={cn("font-bold text-sm",
                                         action.type === "income" && "text-emerald-500",
                                         action.type === "expense" && "text-rose-500",
                                         action.type === "investment" && "text-blue-500"

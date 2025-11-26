@@ -59,30 +59,35 @@ export function MonthNavigationHeader({
     }).format(currentDate);
 
     return (
-        <div className="flex items-center justify-between pb-2">
+        <div className="flex items-center justify-between py-4">
             <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => handleNavigation("prev")}
                 disabled={!hasPrevMonth}
-                className="size-12 text-white/80 hover:text-white disabled:opacity-30"
+                className="size-10 rounded-full bg-white/5 hover:bg-white/10 text-white disabled:opacity-30"
             >
-                <ChevronLeft className="h-6 w-6" />
+                <ChevronLeft className="h-5 w-5" />
                 <span className="sr-only">Mês anterior</span>
             </Button>
 
-            <h2 className="text-lg font-bold capitalize tracking-tight flex-1 text-center">
-                {formattedDate}
-            </h2>
+            <div className="flex flex-col items-center">
+                <h2 className="text-xl font-bold capitalize tracking-tight text-white">
+                    {formattedDate}
+                </h2>
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Visão Geral
+                </span>
+            </div>
 
             <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => handleNavigation("next")}
                 disabled={!hasNextMonth}
-                className="size-12 text-white/80 hover:text-white disabled:opacity-30"
+                className="size-10 rounded-full bg-white/5 hover:bg-white/10 text-white disabled:opacity-30"
             >
-                <ChevronRight className="h-6 w-6" />
+                <ChevronRight className="h-5 w-5" />
                 <span className="sr-only">Próximo mês</span>
             </Button>
         </div>

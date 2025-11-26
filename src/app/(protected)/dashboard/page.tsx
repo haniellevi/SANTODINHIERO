@@ -83,33 +83,43 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const currentDate = new Date(year, month - 1);
 
   return (
-    <div className="flex flex-col pb-32 px-4">
+    <div className="flex min-h-screen flex-col gap-6 pb-32 pt-4 px-4 md:px-8 max-w-5xl mx-auto w-full">
       <MonthNavigationHeader currentDate={currentDate} availableMonths={availableMonths} />
 
-      <div className="text-center pt-6 pb-3">
-        <h1 className={`text-[40px] font-bold tracking-tight leading-tight ${totals.balance > 0 ? "text-emerald-500" : totals.balance < 0 ? "text-red-500" : ""}`}>
+      <div className="flex flex-col items-center justify-center py-8">
+        <h1 className={`text-5xl font-bold tracking-tighter ${totals.balance > 0 ? "text-emerald-500" : totals.balance < 0 ? "text-red-500" : "text-white"}`}>
           {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totals.balance)}
         </h1>
-        <p className="text-muted-foreground text-sm font-normal leading-normal pt-1">Saldo do Mês</p>
+        <p className="mt-2 text-sm font-medium text-muted-foreground uppercase tracking-widest">Saldo do Mês</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 pt-6">
+      <div className="grid grid-cols-2 gap-4">
         <IncomeCard total={totals.totalIncome} />
         <ExpenseCard total={totals.totalExpense} />
       </div>
 
-      <div className="mt-4">
+      <div className="w-full">
         <MonthPlanningAlert currentYear={year} currentMonth={month} userId={dbUser.id} />
       </div>
 
-      <div className="pt-6 pb-28">
+      <div className="mt-2">
         <Tabs defaultValue="upcoming" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="upcoming">Próximas Ações Previstas</TabsTrigger>
-            <TabsTrigger value="pending">Transações Recentes</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/20 p-1 rounded-xl">
+            <TabsTrigger
+              value="upcoming"
+              className="rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white font-semibold transition-all"
+            >
+              Próximas
+            </TabsTrigger>
+            <TabsTrigger
+              value="pending"
+              className="rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white font-semibold transition-all"
+            >
+              Recentes
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="upcoming">
+          <TabsContent value="upcoming" className="mt-0 outline-none animate-in fade-in-50 slide-in-from-bottom-2">
             <UpcomingActionsList
               actions={[
                 ...currentMonth.incomes.map(i => ({
@@ -142,7 +152,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             />
           </TabsContent>
 
-          <TabsContent value="pending">
+          <TabsContent value="pending" className="mt-0 outline-none animate-in fade-in-50 slide-in-from-bottom-2">
             <RecentTransactionsList transactions={transactions} />
           </TabsContent>
         </Tabs>
