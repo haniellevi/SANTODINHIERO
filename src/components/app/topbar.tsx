@@ -23,7 +23,7 @@ export function Topbar() {
 
         {/* Brand with Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative h-12 w-12 rounded-full bg-primary p-1.5 shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-all flex items-center justify-center">
+          <div className="relative h-12 w-12 rounded-full bg-primary p-2 shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-all flex items-center justify-center">
             <Image
               src="/logo-coroa.svg"
               alt={site.shortName}

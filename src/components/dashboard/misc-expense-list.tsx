@@ -8,8 +8,9 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/finance-utils";
-import { Trash2, GripVertical, ShoppingCart } from "lucide-react";
+import { Trash2, GripVertical, ShoppingCart, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { deleteItem, updateItemOrder } from "@/actions/finance";
 import { toast } from "sonner";
@@ -18,6 +19,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea
 import { useState, useEffect } from "react";
 import { EmptyState } from "./empty-state";
 import { EditMiscExpenseDialog } from "./edit-misc-expense-dialog";
+import { cn } from "@/lib/utils";
 
 interface MiscExpenseListProps {
     miscExpenses: MonthWithDetails["miscExpenses"];
@@ -72,8 +74,8 @@ export function MiscExpenseList({ miscExpenses: initialMiscExpenses }: MiscExpen
 
     return (
         <DragDropContext onDragEnd={onDragEnd}>
-            <div className="overflow-x-auto">
-                <Table className="border-separate border-spacing-y-3 min-w-[600px] md:min-w-full">
+            <div className="hidden md:block overflow-x-auto">
+                <Table className="border-separate border-spacing-y-3">
                     <TableHeader>
                         <TableRow className="hover:bg-transparent border-none">
                             <TableHead className="w-[40px] text-muted-foreground font-medium">#</TableHead>
@@ -84,7 +86,7 @@ export function MiscExpenseList({ miscExpenses: initialMiscExpenses }: MiscExpen
                             <TableHead className="w-[100px] text-muted-foreground font-medium">Ações</TableHead>
                         </TableRow>
                     </TableHeader>
-                    <Droppable droppableId="miscExpenses">
+                    <Droppable droppableId="miscExpenses-desktop">
                         {(provided) => (
                             <TableBody {...provided.droppableProps} ref={provided.innerRef}>
                                 {miscExpenses.map((miscExpense, index) => (
@@ -134,6 +136,61 @@ export function MiscExpenseList({ miscExpenses: initialMiscExpenses }: MiscExpen
                         )}
                     </Droppable>
                 </Table>
+            </div>
+
+            <div className="md:hidden space-y-4">
+                <Droppable droppableId="miscExpenses-mobile">
+                    {(provided) => (
+                        <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
+                            {miscExpenses.map((miscExpense, index) => (
+                                <Draggable key={`mobile-${miscExpense.id}`} draggableId={`mobile-${miscExpense.id}`} index={index}>
+                                    {(provided, snapshot) => (
+                                        <Card
+                                            ref={provided.innerRef}
+                                            {...provided.draggableProps}
+                                            className={cn("bg-card border-none shadow-sm", snapshot.isDragging && "opacity-50")}
+                                            style={provided.draggableProps.style}
+                                        >
+                                            <CardContent className="p-4 space-y-3">
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-1.5 hover:bg-muted rounded text-muted-foreground/50">
+                                                            <GripVertical className="h-4 w-4" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-medium line-clamp-1">{miscExpense.description}</p>
+                                                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                                                                <Calendar className="h-3 w-3" />
+                                                                <span>Dia {miscExpense.dayOfMonth || "-"}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <EditMiscExpenseDialog miscExpense={miscExpense} />
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                                            onClick={() => handleDelete(miscExpense.id)}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                                                    <span className="text-xs text-muted-foreground">Valor</span>
+                                                    <p className="font-bold text-lg text-yellow-500">{formatCurrency(Number(miscExpense.amount))}</p>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    )}
+                                </Draggable>
+                            ))}
+                            {provided.placeholder}
+                        </div>
+                    )}
+                </Droppable>
             </div>
         </DragDropContext>
     );
