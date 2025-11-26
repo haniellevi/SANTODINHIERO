@@ -23,20 +23,21 @@ export function Topbar() {
 
         {/* Brand with Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative h-12 w-12 rounded-full bg-primary p-2 shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-all flex items-center justify-center">
+          <div className="relative h-12 w-12 rounded-full bg-primary shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-all flex items-center justify-center overflow-visible">
             <Image
               src="/logo-coroa.svg"
               alt={site.shortName}
-              width={40}
-              height={40}
-              className="object-contain w-full h-full"
+              width={32}
+              height={32}
+              className="object-contain"
+              priority
             />
           </div>
           <div className="flex flex-col">
-            <span className="text-lg font-bold bg-gradient-to-r from-primary via-primary-light to-accent-green bg-clip-text text-transparent">
+            <span className="text-lg font-bold text-primary whitespace-nowrap">
               Santo Dinheiro
             </span>
-            <span className="text-[10px] text-muted-foreground tracking-wider">Finanças Protegidas</span>
+            <span className="text-[10px] text-muted-foreground tracking-wider whitespace-nowrap">Finanças Protegidas</span>
           </div>
         </Link>
 

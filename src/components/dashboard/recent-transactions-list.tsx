@@ -17,19 +17,19 @@ interface RecentTransactionsListProps {
 export function RecentTransactionsList({ transactions }: RecentTransactionsListProps) {
     const getIcon = (type: Transaction["type"]) => {
         switch (type) {
-            case "income": return <ArrowUp className="!text-accent-green" />;
-            case "expense": return <ArrowDown className="!text-accent-red" />;
-            case "investment": return <TrendingUp className="!text-blue-400" />;
-            case "misc": return <Receipt className="!text-yellow-400" />;
+            case "income": return <ArrowUp className="text-emerald-500" />;
+            case "expense": return <ArrowDown className="text-red-500" />;
+            case "investment": return <TrendingUp className="text-blue-400" />;
+            case "misc": return <Receipt className="text-yellow-400" />;
         }
     };
 
     const getAmountColor = (type: Transaction["type"]) => {
         switch (type) {
-            case "income": return "!text-accent-green";
-            case "expense": return "!text-accent-red";
-            case "investment": return "!text-blue-400";
-            case "misc": return "!text-yellow-400";
+            case "income": return "text-emerald-500";
+            case "expense": return "text-red-500";
+            case "investment": return "text-blue-400";
+            case "misc": return "text-yellow-400";
         }
     };
 

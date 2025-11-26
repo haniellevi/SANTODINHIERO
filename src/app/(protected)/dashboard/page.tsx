@@ -87,7 +87,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       <MonthNavigationHeader currentDate={currentDate} availableMonths={availableMonths} />
 
       <div className="text-center pt-6 pb-3">
-        <h1 className="text-[40px] font-bold tracking-tight leading-tight">
+        <h1 className={`text-[40px] font-bold tracking-tight leading-tight ${totals.balance > 0 ? "text-emerald-500" : totals.balance < 0 ? "text-red-500" : ""}`}>
           {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totals.balance)}
         </h1>
         <p className="text-muted-foreground text-sm font-normal leading-normal pt-1">Saldo do Mês</p>
