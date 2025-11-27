@@ -242,7 +242,7 @@ export function MiscExpenseList({ miscExpenses: initialMiscExpenses }: MiscExpen
                                                                 onConfirm={async () => await handleTogglePaid(miscExpense.id, miscExpense.isPaid)}
                                                                 label="Arrastar para pagar"
                                                                 confirmedLabel="Pago"
-                                                                className={miscExpense.isPaid ? "bg-emerald-500/20" : "bg-muted/50"}
+                                                                variant="misc"
                                                             />
                                                         </div>
                                                         <div className="flex items-center gap-1 shrink-0">
@@ -271,3 +271,5 @@ export function MiscExpenseList({ miscExpenses: initialMiscExpenses }: MiscExpen
         </div>
     );
 }
+
+

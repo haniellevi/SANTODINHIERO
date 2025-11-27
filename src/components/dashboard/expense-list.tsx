@@ -256,7 +256,7 @@ export function ExpenseList({
                                                                 <div className="flex justify-between text-xs">
                                                                     <span className="text-muted-foreground">Pago: {formatCurrency(paid)}</span>
                                                                 </div>
-                                                                <Progress value={percentage} className="h-1.5 bg-muted/50" indicatorClassName={percentage >= 100 ? "bg-emerald-500" : "bg-primary"} />
+                                                                <Progress value={percentage} className="h-1.5 bg-muted/50" indicatorClassName="bg-rose-500" />
                                                             </div>
                                                         </TableCell>
                                                         <TableCell className="text-right font-bold text-lg border-y border-border/50 text-rose-500">{formatCurrency(total)}</TableCell>
@@ -346,7 +346,7 @@ export function ExpenseList({
                                                                 <span>Progresso</span>
                                                                 <span>{Math.round(percentage)}%</span>
                                                             </div>
-                                                            <Progress value={percentage} className="h-1.5" indicatorClassName={percentage >= 100 ? "bg-emerald-500" : "bg-primary"} />
+                                                            <Progress value={percentage} className="h-1.5" indicatorClassName="bg-rose-500" />
                                                         </div>
 
                                                         <div className="flex items-center justify-between pt-2 border-t border-border/50 gap-3">
@@ -356,7 +356,7 @@ export function ExpenseList({
                                                                     onConfirm={async () => await handleTogglePaid(expense.id, !(Number(expense.paidAmount) >= Number(expense.totalAmount)))}
                                                                     label="Arrastar para pagar"
                                                                     confirmedLabel="Pago"
-                                                                    className={Number(expense.paidAmount) >= Number(expense.totalAmount) ? "bg-emerald-500/20" : "bg-muted/50"}
+                                                                    variant="expense"
                                                                 />
                                                             </div>
                                                             <div className="flex items-center gap-1 shrink-0">
@@ -381,3 +381,5 @@ export function ExpenseList({
         </div>
     );
 }
+
+

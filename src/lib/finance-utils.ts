@@ -1,5 +1,4 @@
 import { MonthWithDetails } from "./queries/finance";
-import { ExpenseType } from "@prisma/client";
 
 export type FinancialTotals = {
     totalIncome: number;
@@ -57,10 +56,10 @@ export function calculateTotals(month: MonthWithDetails | null): FinancialTotals
         .filter(e => e.type === "STANDARD" || e.type === "TITHE")
         .reduce((acc, item) => acc + Number(item.totalAmount), 0);
 
-    const totalExpense = standardAndTitheExpenses + totalInvestment + totalMisc;
+    const titheAmount = totalIncome * 0.1;
+    const totalExpense = standardAndTitheExpenses + totalInvestment + totalMisc + titheAmount;
 
     const balance = totalIncome - totalExpense;
-    const titheAmount = totalIncome * 0.1;
 
     return {
         totalIncome,

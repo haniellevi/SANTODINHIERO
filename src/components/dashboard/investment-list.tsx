@@ -242,7 +242,7 @@ export function InvestmentList({ investments: initialInvestments }: InvestmentLi
                                                                 onConfirm={async () => await handleTogglePaid(investment.id, investment.isPaid)}
                                                                 label="Arrastar para pagar"
                                                                 confirmedLabel="Pago"
-                                                                className={investment.isPaid ? "bg-emerald-500/20" : "bg-muted/50"}
+                                                                variant="investment"
                                                             />
                                                         </div>
                                                         <div className="flex items-center gap-1 shrink-0">
@@ -271,3 +271,5 @@ export function InvestmentList({ investments: initialInvestments }: InvestmentLi
         </div>
     );
 }
+
+

@@ -85,16 +85,16 @@ export function TransactionSummaryCard({
                     <div className="flex-1 space-y-2">
                         <div className="flex items-baseline justify-between">
                             <span className="text-sm text-muted-foreground">
-                                Total até hoje:
+                                {type === "expense" ? "Total de Saídas:" : "Total até hoje:"}
                             </span>
                             <span className="text-lg font-semibold">
-                                {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totalUpToToday)}
+                                {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(type === "expense" ? totalOverall : totalUpToToday)}
                             </span>
                         </div>
 
                         <div className="flex items-baseline justify-between">
                             <span className="text-sm text-muted-foreground">
-                                {config.markedLabel}:
+                                {type === "expense" ? "Pago nesse mês:" : config.markedLabel + ":"}
                             </span>
                             <span className={`text-lg font-bold ${config.textClass}`}>
                                 {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totalMarked)}

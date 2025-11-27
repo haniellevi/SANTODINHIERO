@@ -11,7 +11,43 @@ interface SlideButtonProps {
     confirmedLabel?: string;
     className?: string;
     disabled?: boolean;
+    variant?: "income" | "expense" | "investment" | "misc";
 }
+
+const variantConfig = {
+    income: {
+        bgConfirmed: "bg-emerald-500/20",
+        bgProgress: "bg-emerald-500/10",
+        thumbConfirmed: "bg-emerald-500",
+        textConfirmed: "text-emerald-600",
+        iconConfirmed: "text-white",
+        iconLoading: "text-emerald-600",
+    },
+    expense: {
+        bgConfirmed: "bg-rose-500/20",
+        bgProgress: "bg-rose-500/10",
+        thumbConfirmed: "bg-rose-500",
+        textConfirmed: "text-rose-600",
+        iconConfirmed: "text-white",
+        iconLoading: "text-rose-600",
+    },
+    investment: {
+        bgConfirmed: "bg-blue-500/20",
+        bgProgress: "bg-blue-500/10",
+        thumbConfirmed: "bg-blue-500",
+        textConfirmed: "text-blue-600",
+        iconConfirmed: "text-white",
+        iconLoading: "text-blue-600",
+    },
+    misc: {
+        bgConfirmed: "bg-amber-500/20",
+        bgProgress: "bg-amber-500/10",
+        thumbConfirmed: "bg-amber-500",
+        textConfirmed: "text-amber-600",
+        iconConfirmed: "text-white",
+        iconLoading: "text-amber-600",
+    },
+};
 
 export function SlideButton({
     onConfirm,
@@ -20,7 +56,9 @@ export function SlideButton({
     confirmedLabel = "Confirmado",
     className,
     disabled = false,
+    variant = "income",
 }: SlideButtonProps) {
+    const config = variantConfig[variant];
     const [isDragging, setIsDragging] = useState(false);
     const [position, setPosition] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
@@ -124,7 +162,7 @@ export function SlideButton({
             onClick={handleClick}
             className={cn(
                 "relative h-10 w-full min-w-[120px] max-w-[200px] rounded-full bg-muted/50 overflow-hidden select-none transition-colors",
-                isConfirmed ? "bg-emerald-500/20 cursor-pointer" : "bg-muted/50",
+                isConfirmed ? `${config.bgConfirmed} cursor-pointer` : "bg-muted/50",
                 disabled && "opacity-50 cursor-not-allowed",
                 className
             )}
@@ -132,7 +170,7 @@ export function SlideButton({
             {/* Background Text */}
             <div className="absolute inset-0 flex items-center justify-center text-xs font-medium text-muted-foreground z-0 pointer-events-none">
                 {isConfirmed ? (
-                    <span className="flex items-center gap-1 text-emerald-600">
+                    <span className={`flex items-center gap-1 ${config.textConfirmed}`}>
                         <Check className="h-3 w-3" /> {confirmedLabel}
                     </span>
                 ) : (
@@ -142,7 +180,7 @@ export function SlideButton({
 
             {/* Progress Track */}
             <div
-                className="absolute inset-y-0 left-0 bg-emerald-500/10 z-0 transition-all duration-75"
+                className={`absolute inset-y-0 left-0 ${config.bgProgress} z-0 transition-all duration-75`}
                 style={{ width: isConfirmed ? "100%" : position + 20 }} // +20 to cover thumb
             />
 
@@ -153,7 +191,7 @@ export function SlideButton({
                 onTouchStart={handleStart}
                 className={cn(
                     "absolute top-1 bottom-1 w-8 rounded-full flex items-center justify-center z-10 shadow-sm cursor-grab active:cursor-grabbing transition-transform duration-75",
-                    isConfirmed ? "bg-emerald-500 right-1 cursor-pointer" : "bg-background border border-border/50"
+                    isConfirmed ? `${config.thumbConfirmed} right-1 cursor-pointer` : "bg-background border border-border/50"
                 )}
                 style={{
                     transform: isConfirmed ? "none" : `translateX(${position}px)`,
@@ -161,9 +199,9 @@ export function SlideButton({
                 }}
             >
                 {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
+                    <Loader2 className={`h-4 w-4 animate-spin ${config.iconLoading}`} />
                 ) : isConfirmed ? (
-                    <Check className="h-4 w-4 text-white" />
+                    <Check className={`h-4 w-4 ${config.iconConfirmed}`} />
                 ) : (
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 )}

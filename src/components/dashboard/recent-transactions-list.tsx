@@ -65,7 +65,9 @@ export function RecentTransactionsList({ transactions }: RecentTransactionsListP
                                 </div>
                                 <div className="flex flex-col truncate">
                                     <p className="truncate text-sm font-semibold text-foreground/90">{tx.description}</p>
-                                    <p className="text-xs text-muted-foreground capitalize">{tx.type === "misc" ? "Outros" : tx.type === "income" ? "Entrada" : tx.type === "expense" ? "Saída" : "Investimento"}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        {tx.date ? `Dia ${new Date(tx.date).getDate()}` : "Data não disponível"} • {tx.type === "misc" ? "Outros" : tx.type === "income" ? "Entrada" : tx.type === "expense" ? "Saída" : "Investimento"}
+                                    </p>
                                 </div>
                             </div>
                             <p className={cn("whitespace-nowrap font-bold text-sm", getAmountColor(tx.type))}>

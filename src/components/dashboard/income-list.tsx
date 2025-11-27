@@ -242,7 +242,7 @@ export function IncomeList({ incomes: initialIncomes }: IncomeListProps) {
                                                                 onConfirm={async () => await handleToggleReceived(income.id, income.isReceived)}
                                                                 label="Arrastar para receber"
                                                                 confirmedLabel="Recebido"
-                                                                className={income.isReceived ? "bg-emerald-500/20" : "bg-muted/50"}
+                                                                variant="income"
                                                             />
                                                         </div>
                                                         <div className="flex items-center gap-1 shrink-0">
