@@ -2,7 +2,7 @@
 
 ## 1. Visão Geral
 
-O banco de dados utiliza **PostgreSQL**, hospedado no **Supabase**. O gerenciamento do esquema e as migrações são feitos através do **Prisma ORM**.
+O banco de dados utiliza **PostgreSQL**, hospedado localmente via Docker ou no **Supabase** em produção. O gerenciamento do esquema e as migrações são feitos através do **Prisma ORM v6**.
 
 Esta documentação descreve a estrutura atual do banco de dados, incluindo tabelas, relacionamentos e tipos de dados.
 
@@ -18,8 +18,17 @@ Tabela central de usuários, integrada com o Clerk para autenticação.
 | `email` | String? | E-mail do usuário (Unique). |
 | `name` | String? | Nome do usuário. |
 | `isActive` | Boolean | Status da conta (padrão: true). |
+| `isTitheEnabled` | Boolean | Se o dízimo automático está ativado (padrão: true). |
+| `planningAlertDays` | Int | Dias antes do fim do mês para alerta de planejamento (padrão: 5). |
+| `role` | UserRole | Role do usuário: USER ou ADMIN (padrão: USER). |
 | `createdAt` | DateTime | Data de criação. |
 | `updatedAt` | DateTime | Data de atualização. |
+
+**Relacionamentos:**
+- `months`: Lista de meses financeiros do usuário.
+- `collaborators`: Colaboradores que o usuário convidou (owner).
+- `collaborations`: Convites que o usuário recebeu (member).
+- `feedbacks`: Feedbacks enviados pelo usuário.
 
 ### 2.2. Month (Mês Financeiro)
 Agrupa todas as transações de um mês específico para um usuário.
@@ -31,8 +40,17 @@ Agrupa todas as transações de um mês específico para um usuário.
 | `month` | Int | Mês (1-12). |
 | `year` | Int | Ano (ex: 2024). |
 | `isOpen` | Boolean | Se o mês está aberto para edições. |
-| `isTithePaid` | Boolean | Se o dízimo do mês foi pago. |
-| `tithePaidAmount` | Decimal | Valor pago do dízimo. |
+| `isTithePaid` | Boolean | Se o dízimo do mês foi pago (legado, mantido para compatibilidade). |
+| `tithePaidAmount` | Decimal | Valor pago do dízimo (usado para métricas de BI). |
+| `createdAt` | DateTime | Data de criação. |
+| `updatedAt` | DateTime | Data de atualização. |
+
+**Relacionamentos:**
+- `user`: Usuário dono do mês.
+- `incomes`: Receitas do mês.
+- `expenses`: Despesas do mês.
+- `investments`: Investimentos do mês.
+- `miscExpenses`: Gastos avulsos do mês.
 
 ### 2.3. Income (Receita)
 Entradas financeiras.
@@ -43,7 +61,15 @@ Entradas financeiras.
 | `monthId` | String | FK para Month. |
 | `description` | String | Descrição. |
 | `amount` | Decimal | Valor previsto. |
+| `dayOfMonth` | Int? | Dia do mês previsto. |
+| `order` | Int | Ordem de exibição (padrão: 0). |
 | `isReceived` | Boolean | Se o valor já foi recebido. |
+| `isTithePaid` | Boolean | Se o dízimo desta receita foi pago (padrão: false). |
+| `createdAt` | DateTime | Data de criação. |
+| `updatedAt` | DateTime | Data de atualização. |
+
+**Relacionamentos:**
+- `month`: Mês ao qual a receita pertence.
 
 ### 2.4. Expense (Despesa)
 Saídas financeiras e obrigações.
@@ -54,9 +80,16 @@ Saídas financeiras e obrigações.
 | `monthId` | String | FK para Month. |
 | `description` | String | Descrição. |
 | `totalAmount` | Decimal | Valor total. |
-| `paidAmount` | Decimal | Valor pago. |
+| `paidAmount` | Decimal | Valor pago (padrão: 0). |
+| `dayOfMonth` | Int? | Dia do mês previsto. |
+| `order` | Int | Ordem de exibição (padrão: 0). |
+| `type` | ExpenseType | Tipo (STANDARD, TITHE, INVESTMENT_TOTAL, MISC_TOTAL). |
 | `isPaid` | Boolean | Status de pagamento total. |
-| `type` | ExpenseType | Tipo (STANDARD, TITHE, etc). |
+| `createdAt` | DateTime | Data de criação. |
+| `updatedAt` | DateTime | Data de atualização. |
+
+**Relacionamentos:**
+- `month`: Mês ao qual a despesa pertence.
 
 ### 2.5. Investment (Investimento)
 Aportes financeiros.
@@ -65,8 +98,16 @@ Aportes financeiros.
 |---|---|---|
 | `id` | String (CUID) | Identificador único. |
 | `monthId` | String | FK para Month. |
+| `description` | String | Descrição. |
 | `amount` | Decimal | Valor do aporte. |
+| `dayOfMonth` | Int? | Dia do mês previsto. |
+| `order` | Int | Ordem de exibição (padrão: 0). |
 | `isPaid` | Boolean | Se o aporte foi realizado. |
+| `createdAt` | DateTime | Data de criação. |
+| `updatedAt` | DateTime | Data de atualização. |
+
+**Relacionamentos:**
+- `month`: Mês ao qual o investimento pertence.
 
 ### 2.6. MiscExpense (Gasto Avulso)
 Gastos variáveis não planejados.
@@ -75,15 +116,160 @@ Gastos variáveis não planejados.
 |---|---|---|
 | `id` | String (CUID) | Identificador único. |
 | `monthId` | String | FK para Month. |
+| `description` | String | Descrição. |
 | `amount` | Decimal | Valor do gasto. |
+| `dayOfMonth` | Int? | Dia do mês previsto. |
+| `order` | Int | Ordem de exibição (padrão: 0). |
 | `isPaid` | Boolean | Se o gasto foi realizado. |
+| `createdAt` | DateTime | Data de criação. |
+| `updatedAt` | DateTime | Data de atualização. |
 
-### 2.7. Lógica de Negócios e Cálculos
-- **Saída Total (Dashboard):** É a soma de `Expense.totalAmount` (incluindo Dízimo) + `Investment.amount` + `MiscExpense.amount`.
-- **Saldo Previsto (Dashboard):** Calculado somando todas as `Income` agendadas para o dia atual ou anterior, e subtraindo todas as saídas (`Expense`, `Investment`, `MiscExpense`) agendadas para o dia atual ou anterior. O campo `dayOfMonth` é usado como referência.
+**Relacionamentos:**
+- `month`: Mês ao qual o gasto pertence.
+
+### 2.7. Plan (Plano de Assinatura)
+Definições de planos de assinatura.
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `id` | String (CUID) | Identificador único. |
+| `clerkId` | String? | ID do plano no Clerk (Unique). |
+| `billingSource` | String | Fonte de cobrança: 'clerk' ou 'manual' (padrão: 'clerk'). |
+| `name` | String | Nome do plano. |
+| `clerkName` | String? | Nome do plano no Clerk. |
+| `currency` | String? | Moeda (padrão: 'brl'). |
+| `priceMonthlyCents` | Int? | Preço mensal em centavos. |
+| `priceYearlyCents` | Int? | Preço anual em centavos. |
+| `description` | String? | Descrição do plano. |
+| `features` | String? | Features em formato JSON. |
+| `maxCollaborators` | Int | Limite de colaboradores (padrão: 0). |
+| `badge` | String? | Badge do plano. |
+| `highlight` | Boolean | Se o plano deve ser destacado (padrão: false). |
+| `ctaType` | String? | Tipo de CTA: 'checkout' ou 'contact' (padrão: 'checkout'). |
+| `ctaLabel` | String? | Label do CTA. |
+| `ctaUrl` | String? | URL do CTA. |
+| `active` | Boolean | Se o plano está ativo (padrão: true). |
+| `createdAt` | DateTime | Data de criação. |
+| `updatedAt` | DateTime | Data de atualização. |
+
+### 2.8. Collaborator (Colaborador)
+Convites e permissões de acesso à conta de outro usuário.
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `id` | String (CUID) | Identificador único. |
+| `ownerId` | String | FK para User (dono da conta). |
+| `email` | String | E-mail do convidado. |
+| `userId` | String? | FK para User (se o convidado já tiver conta). |
+| `status` | InviteStatus | Status do convite: PENDING, ACCEPTED, REJECTED (padrão: PENDING). |
+| `permission` | Permission | Nível de permissão: VIEWER, EDITOR, ADMIN (padrão: VIEWER). |
+| `createdAt` | DateTime | Data de criação. |
+| `updatedAt` | DateTime | Data de atualização. |
+
+**Relacionamentos:**
+- `owner`: Usuário que enviou o convite.
+- `user`: Usuário convidado (se já tiver conta).
+
+**Constraint:**
+- `@@unique([ownerId, email])`: Um e-mail só pode ser convidado uma vez por dono.
+
+### 2.9. Feedback (Suporte e Feedback)
+Solicitações de suporte e sugestões dos usuários.
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `id` | String (CUID) | Identificador único. |
+| `userId` | String | FK para User. |
+| `type` | FeedbackType | Tipo: BUG, FEATURE_REQUEST, OTHER. |
+| `message` | String (Text) | Mensagem do feedback. |
+| `status` | FeedbackStatus | Status: OPEN, IN_PROGRESS, RESOLVED, CLOSED (padrão: OPEN). |
+| `createdAt` | DateTime | Data de criação. |
+| `updatedAt` | DateTime | Data de atualização. |
+
+**Relacionamentos:**
+- `user`: Usuário que enviou o feedback.
+
+### 2.10. StorageObject (Armazenamento)
+Objetos armazenados (Vercel Blob ou Replit Storage).
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `id` | String (CUID) | Identificador único. |
+| `clerkUserId` | String | ID do usuário no Clerk. |
+| `pathname` | String | Caminho do arquivo. |
+| `url` | String | URL do arquivo. |
+| `contentType` | String? | Tipo de conteúdo. |
+| `size` | Int? | Tamanho em bytes. |
+| `name` | String? | Nome do arquivo. |
+| `createdAt` | DateTime | Data de criação. |
+| `updatedAt` | DateTime | Data de atualização. |
+
+## 3. Enums
+
+### 3.1. ExpenseType
+```prisma
+enum ExpenseType {
+  STANDARD          // Despesa padrão
+  TITHE             // Dízimo (legado, não mais usado)
+  INVESTMENT_TOTAL  // Total de investimentos (agregado)
+  MISC_TOTAL        // Total de gastos avulsos (agregado)
+}
+```
+
+### 3.2. UserRole
+```prisma
+enum UserRole {
+  USER   // Usuário padrão
+  ADMIN  // Administrador (acesso ao /admin)
+}
+```
+
+### 3.3. InviteStatus
+```prisma
+enum InviteStatus {
+  PENDING   // Convite pendente
+  ACCEPTED  // Convite aceito
+  REJECTED  // Convite rejeitado
+}
+```
+
+### 3.4. Permission
+```prisma
+enum Permission {
+  VIEWER  // Apenas visualiza
+  EDITOR  // Pode editar, mas não deletar/configurar
+  ADMIN   // Acesso total à conta (exceto deletar a conta principal)
+}
+```
+
+### 3.5. FeedbackType
+```prisma
+enum FeedbackType {
+  BUG              // Reportar erro
+  FEATURE_REQUEST  // Sugestão de melhoria
+  OTHER            // Outro
+}
+```
+
+### 3.6. FeedbackStatus
+```prisma
+enum FeedbackStatus {
+  OPEN         // Aberto
+  IN_PROGRESS  // Em progresso
+  RESOLVED     // Resolvido
+  CLOSED       // Fechado
+}
+```
+
+## 4. Lógica de Negócios e Cálculos
+
+- **Saída Total (Dashboard):** Soma de `Expense.totalAmount` (incluindo Dízimo) + `Investment.amount` + `MiscExpense.amount`.
+- **Saldo Previsto (Dashboard):** Soma de todas as `Income` agendadas para o dia atual ou anterior, menos todas as saídas (`Expense`, `Investment`, `MiscExpense`) agendadas para o dia atual ou anterior. O campo `dayOfMonth` é usado como referência.
 - **Saldo do Mês:** `Total Income` - `Total Outflow` (todas as saídas).
+- **Dízimos Dinâmicos:** Gerados em tempo real a partir das `Income` (10% de cada), exibidos apenas se `User.isTitheEnabled` for `true`. O status de pagamento é armazenado em `Income.isTithePaid`.
+- **Limite de Colaboradores:** Verificado contra `Plan.maxCollaborators` antes de permitir novos convites.
 
-## 3. Prisma Schema (Atual)
+## 5. Prisma Schema (Atual)
 
 ```prisma
 generator client {
@@ -105,7 +291,16 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Configurações
+  isTitheEnabled      Boolean @default(true)
+  planningAlertDays   Int     @default(5)
+  role                UserRole @default(USER)
+
+  // Relacionamentos
   months             Month[]
+  collaborators      Collaborator[] @relation("OwnerCollaborators")
+  collaborations     Collaborator[] @relation("MemberCollaborations")
+  feedbacks          Feedback[]
 
   @@index([email])
   @@index([name])
@@ -144,6 +339,7 @@ model Income {
   dayOfMonth  Int?
   order       Int      @default(0)
   isReceived  Boolean  @default(false)
+  isTithePaid Boolean  @default(false)
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -217,6 +413,7 @@ model Plan {
   priceYearlyCents    Int?
   description         String?  @db.Text
   features            String?  @db.Text
+  maxCollaborators    Int      @default(0)
   badge               String?
   highlight           Boolean  @default(false)
   ctaType             String?  @default("checkout")
@@ -228,6 +425,38 @@ model Plan {
 
   @@index([clerkId])
   @@index([active])
+}
+
+model Collaborator {
+  id          String   @id @default(cuid())
+  
+  ownerId     String
+  owner       User     @relation("OwnerCollaborators", fields: [ownerId], references: [id])
+  
+  email       String
+  userId      String?
+  user        User?    @relation("MemberCollaborations", fields: [userId], references: [id])
+  
+  status      InviteStatus @default(PENDING)
+  permission  Permission   @default(VIEWER)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([ownerId, email])
+}
+
+model Feedback {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  type        FeedbackType
+  message     String   @db.Text
+  status      FeedbackStatus @default(OPEN)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model StorageObject {
@@ -251,190 +480,64 @@ enum ExpenseType {
   INVESTMENT_TOTAL
   MISC_TOTAL
 }
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum Permission {
+  VIEWER
+  EDITOR
+  ADMIN
+}
+
+enum FeedbackType {
+  BUG
+  FEATURE_REQUEST
+  OTHER
+}
+
+enum FeedbackStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
 ```
 
-## 4. SQL Schema (DDL) para Replicação
+## 6. Diagrama de Relacionamentos (ER)
 
-Use este script SQL para recriar a estrutura do banco de dados em qualquer instância PostgreSQL.
-
-```sql
--- CreateEnum
-CREATE TYPE "ExpenseType" AS ENUM ('STANDARD', 'TITHE', 'INVESTMENT_TOTAL', 'MISC_TOTAL');
-
--- CreateTable
-CREATE TABLE "User" (
-    "id" TEXT NOT NULL,
-    "clerkId" TEXT NOT NULL,
-    "email" TEXT,
-    "name" TEXT,
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Month" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "month" INTEGER NOT NULL,
-    "year" INTEGER NOT NULL,
-    "isOpen" BOOLEAN NOT NULL DEFAULT true,
-    "isTithePaid" BOOLEAN NOT NULL DEFAULT false,
-    "tithePaidAmount" DECIMAL(10,2) NOT NULL DEFAULT 0,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Month_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Income" (
-    "id" TEXT NOT NULL,
-    "monthId" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
-    "amount" DECIMAL(10,2) NOT NULL,
-    "dayOfMonth" INTEGER,
-    "order" INTEGER NOT NULL DEFAULT 0,
-    "isReceived" BOOLEAN NOT NULL DEFAULT false,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Income_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Expense" (
-    "id" TEXT NOT NULL,
-    "monthId" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
-    "totalAmount" DECIMAL(10,2) NOT NULL,
-    "paidAmount" DECIMAL(10,2) NOT NULL DEFAULT 0,
-    "dayOfMonth" INTEGER,
-    "order" INTEGER NOT NULL DEFAULT 0,
-    "type" "ExpenseType" NOT NULL DEFAULT 'STANDARD',
-    "isPaid" BOOLEAN NOT NULL DEFAULT false,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Expense_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Investment" (
-    "id" TEXT NOT NULL,
-    "monthId" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
-    "amount" DECIMAL(10,2) NOT NULL,
-    "dayOfMonth" INTEGER,
-    "order" INTEGER NOT NULL DEFAULT 0,
-    "isPaid" BOOLEAN NOT NULL DEFAULT false,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Investment_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "MiscExpense" (
-    "id" TEXT NOT NULL,
-    "monthId" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
-    "amount" DECIMAL(10,2) NOT NULL,
-    "dayOfMonth" INTEGER,
-    "order" INTEGER NOT NULL DEFAULT 0,
-    "isPaid" BOOLEAN NOT NULL DEFAULT false,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "MiscExpense_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Plan" (
-    "id" TEXT NOT NULL,
-    "clerkId" TEXT,
-    "billingSource" TEXT NOT NULL DEFAULT 'clerk',
-    "name" TEXT NOT NULL,
-    "clerkName" TEXT,
-    "currency" TEXT DEFAULT 'brl',
-    "priceMonthlyCents" INTEGER,
-    "priceYearlyCents" INTEGER,
-    "description" TEXT,
-    "features" TEXT,
-    "badge" TEXT,
-    "highlight" BOOLEAN NOT NULL DEFAULT false,
-    "ctaType" TEXT DEFAULT 'checkout',
-    "ctaLabel" TEXT,
-    "ctaUrl" TEXT,
-    "active" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Plan_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "StorageObject" (
-    "id" TEXT NOT NULL,
-    "clerkUserId" TEXT NOT NULL,
-    "pathname" TEXT NOT NULL,
-    "url" TEXT NOT NULL,
-    "contentType" TEXT,
-    "size" INTEGER,
-    "name" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "StorageObject_pkey" PRIMARY KEY ("id")
-);
-
--- CreateIndex
-CREATE UNIQUE INDEX "User_clerkId_key" ON "User"("clerkId");
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
-CREATE INDEX "User_email_idx" ON "User"("email");
-CREATE INDEX "User_name_idx" ON "User"("name");
-CREATE INDEX "User_createdAt_idx" ON "User"("createdAt");
-CREATE INDEX "User_isActive_idx" ON "User"("isActive");
-
--- CreateIndex
-CREATE INDEX "Month_userId_idx" ON "Month"("userId");
-CREATE UNIQUE INDEX "Month_userId_month_year_key" ON "Month"("userId", "month", "year");
-
--- CreateIndex
-CREATE INDEX "Income_monthId_idx" ON "Income"("monthId");
-
--- CreateIndex
-CREATE INDEX "Expense_monthId_idx" ON "Expense"("monthId");
-
--- CreateIndex
-CREATE INDEX "Investment_monthId_idx" ON "Investment"("monthId");
-
--- CreateIndex
-CREATE INDEX "MiscExpense_monthId_idx" ON "MiscExpense"("monthId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Plan_clerkId_key" ON "Plan"("clerkId");
-CREATE INDEX "Plan_clerkId_idx" ON "Plan"("clerkId");
-CREATE INDEX "Plan_active_idx" ON "Plan"("active");
-
--- CreateIndex
-CREATE INDEX "StorageObject_clerkUserId_idx" ON "StorageObject"("clerkUserId");
-CREATE INDEX "StorageObject_createdAt_idx" ON "StorageObject"("createdAt");
-
--- AddForeignKey
-ALTER TABLE "Month" ADD CONSTRAINT "Month_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Income" ADD CONSTRAINT "Income_monthId_fkey" FOREIGN KEY ("monthId") REFERENCES "Month"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Expense" ADD CONSTRAINT "Expense_monthId_fkey" FOREIGN KEY ("monthId") REFERENCES "Month"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Investment" ADD CONSTRAINT "Investment_monthId_fkey" FOREIGN KEY ("monthId") REFERENCES "Month"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "MiscExpense" ADD CONSTRAINT "MiscExpense_monthId_fkey" FOREIGN KEY ("monthId") REFERENCES "Month"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ```
+User (1) ──── (N) Month
+User (1) ──── (N) Collaborator [as owner]
+User (1) ──── (N) Collaborator [as member]
+User (1) ──── (N) Feedback
+
+Month (1) ──── (N) Income
+Month (1) ──── (N) Expense
+Month (1) ──── (N) Investment
+Month (1) ──── (N) MiscExpense
+```
+
+## 7. Índices e Performance
+
+- **User**: Índices em `email`, `name`, `createdAt`, `isActive` para buscas rápidas.
+- **Month**: Índice em `userId` e constraint único em `[userId, month, year]` para evitar duplicatas.
+- **Transações (Income, Expense, Investment, MiscExpense)**: Índices em `monthId` para queries eficientes.
+- **Plan**: Índices em `clerkId` e `active`.
+- **Collaborator**: Constraint único em `[ownerId, email]` para evitar convites duplicados.
+- **StorageObject**: Índices em `clerkUserId` e `createdAt`.
+
+## 8. Migrações e Versionamento
+
+- **Ferramenta**: Prisma Migrate (`npx prisma migrate dev`).
+- **Ambiente de Desenvolvimento**: `npx prisma db push` para prototipagem rápida.
+- **Produção**: Migrações versionadas e aplicadas via CI/CD.
+- **Backup**: Backups automáticos antes de alterações críticas via script Docker (`docker exec -t [container] pg_dumpall`).
