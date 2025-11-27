@@ -26,8 +26,7 @@ CLERK_WEBHOOK_SECRET=whsec_...
 # Clerk URLs (customize as needed)
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
 NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
+NEXT_PUBLIC_CLERK_FALLBACK_REDIRECT_URL=/dashboard
 ```
 
 ### Root Layout Setup
@@ -441,7 +440,7 @@ export default function SignInPage() {
             card: "bg-white shadow-lg"
           }
         }}
-        redirectUrl="/dashboard"
+        fallbackRedirectUrl="/dashboard"
       />
     </div>
   );
@@ -464,7 +463,7 @@ export default function SignUpPage() {
             card: "bg-white shadow-lg"
           }
         }}
-        redirectUrl="/dashboard"
+        fallbackRedirectUrl="/dashboard"
       />
     </div>
   );
@@ -511,7 +510,7 @@ export default function SignInPage() {
   return (
     <SignIn 
       appearance={clerkTheme}
-      redirectUrl="/dashboard"
+      fallbackRedirectUrl="/dashboard"
     />
   );
 }
