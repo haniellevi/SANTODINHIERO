@@ -6,6 +6,21 @@ import { api } from '@/lib/api-client';
 export interface DashboardStats {
   totalUsers: number;
   activeUsers: number;
+  newUsersThisMonth: number;
+  totalTTV: number;
+  totalTitheVolume: number;
+  expenseDistribution: { name: string; value: number }[];
+  recentFeedbacks: Array<{
+    id: string;
+    type: string;
+    message: string;
+    status: string;
+    createdAt: string;
+    user: {
+      name: string | null;
+      email: string | null;
+    };
+  }>;
   totalCredits: number;
   usedCredits: number;
   mrrSeries: { label: string; value: number }[];

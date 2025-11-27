@@ -165,17 +165,17 @@ export function IncomeList({ incomes: initialIncomes }: IncomeListProps) {
                                                         </span>
                                                     </TableCell>
                                                     <TableCell className="rounded-r-xl border-y border-r border-white/5 pr-4">
-                                                        <div className="flex items-center justify-end gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200">
+                                                        <div className="flex items-center justify-end gap-1">
                                                             <Button
-                                                                variant="ghost"
+                                                                variant={income.isReceived ? "default" : "outline"}
                                                                 size="icon"
-                                                                className={`h-8 w-8 rounded-lg transition-all ${income.isReceived
-                                                                    ? "text-emerald-500 bg-emerald-500/10 hover:bg-emerald-500/20"
-                                                                    : "text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10"
+                                                                className={`h-8 w-8 rounded-full transition-all ${income.isReceived
+                                                                    ? "bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/20 border-transparent"
+                                                                    : "text-muted-foreground hover:text-emerald-500 hover:border-emerald-500/50 hover:bg-emerald-500/5"
                                                                     }`}
                                                                 onClick={() => handleToggleReceived(income.id, income.isReceived)}
                                                             >
-                                                                <CheckCircle2 className={`h-4 w-4 ${income.isReceived ? "fill-current" : ""}`} />
+                                                                <CheckCircle2 className="h-4 w-4" />
                                                             </Button>
                                                             <EditIncomeDialog income={income} />
                                                             <Button

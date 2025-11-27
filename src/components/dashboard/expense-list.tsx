@@ -10,10 +10,10 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/finance-utils";
-import { Trash2, Lock, GripVertical, TrendingDown, Pencil, Calendar, CheckCircle2, Circle, Crown } from "lucide-react";
+import { Trash2, GripVertical, TrendingDown, Calendar, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SlideButton } from "@/components/ui/slide-button";
-import { deleteItem, updateItemOrder, toggleExpensePaid, toggleTithePaid } from "@/actions/finance";
+import { deleteItem, updateItemOrder, toggleExpensePaid, toggleIncomeTithePaid } from "@/actions/finance";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 import { MonthWithDetails } from "@/lib/queries/finance";
@@ -37,10 +37,16 @@ type SerializedMiscExpense = Omit<MonthWithDetails["miscExpenses"][number], "amo
     amount: number;
 };
 
+type SerializedIncome = Omit<MonthWithDetails["incomes"][number], "amount"> & {
+    amount: number;
+    isTithePaid?: boolean;
+};
+
 interface ExpenseListProps {
     expenses: SerializedExpense[];
     investments: SerializedInvestment[];
     miscExpenses: SerializedMiscExpense[];
+    incomes: SerializedIncome[];
     titheAmount: number;
     totalInvestment: number;
     totalInvestmentPaid: number;
@@ -48,31 +54,31 @@ interface ExpenseListProps {
     totalMiscPaid: number;
     isTithePaid: boolean;
     monthId: string;
+    isTitheEnabled?: boolean;
 }
 
 export function ExpenseList({
     expenses: initialExpenses,
     investments,
     miscExpenses,
-    titheAmount,
+    incomes: initialIncomes,
     totalInvestment,
     totalInvestmentPaid,
     totalMisc,
     totalMiscPaid,
-    isTithePaid,
-    monthId
+    monthId,
+    isTitheEnabled = true
 }: ExpenseListProps) {
     const [expenses, setExpenses] = useState(initialExpenses);
-    const [isTithePaidState, setIsTithePaidState] = useState(isTithePaid);
+    const [incomes, setIncomes] = useState(initialIncomes);
 
     useEffect(() => {
         setExpenses(initialExpenses);
-        setIsTithePaidState(isTithePaid);
-    }, [initialExpenses, isTithePaid]);
+        setIncomes(initialIncomes);
+    }, [initialExpenses, initialIncomes]);
 
     const currentDay = new Date().getDate();
 
-    // Calculate investments and misc expenses up to today
     const investmentsUpToToday = investments
         .filter(i => (i.dayOfMonth || 32) <= currentDay)
         .reduce((sum, i) => sum + i.amount, 0);
@@ -81,22 +87,46 @@ export function ExpenseList({
         .filter(m => (m.dayOfMonth || 32) <= currentDay)
         .reduce((sum, m) => sum + m.amount, 0);
 
-    // Include ALL totals (expenses + tithe + investments + misc) for accurate calculations
-    // For "up to today", only include items with dayOfMonth <= currentDay
-    // Tithe has no dayOfMonth, so we include it in totalOverall but NOT in totalUpToToday
+    const titheItems = isTitheEnabled ? incomes.map(income => ({
+        id: `tithe-${income.id}`,
+        originalId: income.id,
+        description: `Dízimo - ${income.description}`,
+        amount: income.amount * 0.1,
+        dayOfMonth: income.dayOfMonth,
+        isPaid: income.isTithePaid || false,
+        displayType: 'tithe' as const
+    })) : [];
+
+    const totalTithe = titheItems.reduce((acc, curr) => acc + curr.amount, 0);
+    const totalTithePaid = titheItems.filter(t => t.isPaid).reduce((acc, curr) => acc + curr.amount, 0);
+
     const totalUpToToday = expenses
         .filter(e => (e.dayOfMonth || 32) <= currentDay)
         .reduce((acc, curr) => acc + Number(curr.totalAmount), 0)
         + investmentsUpToToday
         + miscExpensesUpToToday;
 
-    // Sum paid amounts including tithe (if paid), investments and misc
     const totalPaid = expenses.reduce((acc, curr) => acc + Number(curr.paidAmount), 0)
         + totalInvestmentPaid
         + totalMiscPaid
-        + (isTithePaidState ? titheAmount : 0);
+        + totalTithePaid;
 
-    const totalOverall = expenses.reduce((acc, curr) => acc + Number(curr.totalAmount), 0) + titheAmount + totalInvestment + totalMisc;
+    const totalOverall = expenses.reduce((acc, curr) => acc + Number(curr.totalAmount), 0) + totalTithe + totalInvestment + totalMisc;
+
+    const displayItems = [
+        ...expenses.map(e => ({ ...e, displayType: 'expense' as const })),
+        ...titheItems
+    ].sort((a, b) => {
+        const dayA = a.dayOfMonth || 32;
+        const dayB = b.dayOfMonth || 32;
+        if (dayA !== dayB) return dayA - dayB;
+
+        if (a.displayType === 'tithe' && b.displayType === 'expense') return -1;
+        if (a.displayType === 'expense' && b.displayType === 'tithe') return 1;
+
+        if (a.displayType === 'expense' && b.displayType === 'expense') return (a as any).order - (b as any).order;
+        return 0;
+    });
 
     async function handleDelete(id: string) {
         try {
@@ -108,7 +138,6 @@ export function ExpenseList({
     }
 
     async function handleTogglePaid(id: string, isPaid: boolean) {
-        // Optimistic update
         const updatedExpenses = expenses.map(e => {
             if (e.id === id) {
                 return {
@@ -125,19 +154,25 @@ export function ExpenseList({
             await toggleExpensePaid(id, isPaid);
             toast.success(isPaid ? "Despesa marcada como paga" : "Despesa marcada como pendente");
         } catch (error) {
-            // Revert on error
             setExpenses(expenses);
             toast.error("Erro ao atualizar status");
         }
     }
 
-    async function handleToggleTithe(isPaid: boolean) {
-        setIsTithePaidState(isPaid);
+    async function handleToggleTithe(incomeId: string, isPaid: boolean) {
+        const updatedIncomes = incomes.map(i => {
+            if (i.id === incomeId) {
+                return { ...i, isTithePaid: isPaid };
+            }
+            return i;
+        });
+        setIncomes(updatedIncomes);
+
         try {
-            await toggleTithePaid(monthId, isPaid);
+            await toggleIncomeTithePaid(incomeId, isPaid);
             toast.success(isPaid ? "Dízimo marcado como pago" : "Dízimo marcado como pendente");
         } catch (error) {
-            setIsTithePaidState(!isPaid);
+            setIncomes(incomes);
             toast.error("Erro ao atualizar status do dízimo");
         }
     }
@@ -145,7 +180,7 @@ export function ExpenseList({
     async function onDragEnd(result: DropResult) {
         if (!result.destination) return;
 
-        const items = Array.from(expenses) as typeof expenses;
+        const items = Array.from(expenses);
         const [reorderedItem] = items.splice(result.source.index, 1);
         items.splice(result.destination.index, 0, reorderedItem);
 
@@ -163,7 +198,7 @@ export function ExpenseList({
         }
     }
 
-    const hasExpenses = expenses.length > 0 || titheAmount > 0 || totalInvestment > 0 || totalMisc > 0;
+    const hasExpenses = displayItems.length > 0 || totalInvestment > 0 || totalMisc > 0;
 
     if (!hasExpenses) {
         return (
@@ -200,42 +235,45 @@ export function ExpenseList({
                             </TableRow>
                         </TableHeader>
 
-                        {(titheAmount > 0) && (
-                            <TableBody>
-                                {titheAmount > 0 && (
-                                    <TableRow className="bg-gradient-to-r from-yellow-500/10 via-amber-500/5 to-yellow-500/10 hover:from-yellow-500/20 hover:to-yellow-500/20 transition-all border-none rounded-lg shadow-sm border-l-4 border-l-amber-500">
-                                        <TableCell className="rounded-l-lg border-y border-amber-500/20 text-amber-600/70 text-xs">-</TableCell>
-                                        <TableCell className="border-y border-amber-500/20"><Crown className="h-5 w-5 text-amber-500 mx-auto fill-amber-500/20" /></TableCell>
-                                        <TableCell className="font-bold text-amber-600 border-y border-amber-500/20 whitespace-normal text-base">Dízimo (10%)</TableCell>
-                                        <TableCell className="border-y border-amber-500/20">-</TableCell>
-                                        <TableCell className="text-xs text-amber-600/70 border-y border-amber-500/20 w-[200px]">
-                                            <SlideButton
-                                                isConfirmed={isTithePaidState}
-                                                onConfirm={async () => await handleToggleTithe(!isTithePaidState)}
-                                                label="Arrastar para pagar"
-                                                confirmedLabel="Pago"
-                                                className={isTithePaidState ? "bg-amber-500 text-white hover:bg-amber-600" : "bg-amber-500/10 text-amber-700 hover:bg-amber-500/20"}
-                                            />
-                                        </TableCell>
-                                        <TableCell className="text-right font-bold text-xl border-y border-amber-500/20 text-amber-600">{formatCurrency(titheAmount)}</TableCell>
-                                        <TableCell className="rounded-r-lg border-y border-r border-amber-500/20">
-                                            <Button variant="ghost" size="icon" disabled className="h-8 w-8 text-amber-500/50"><Lock className="h-4 w-4" /></Button>
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        )}
-
                         <Droppable droppableId="expenses-desktop">
                             {(provided) => (
                                 <TableBody {...provided.droppableProps} ref={provided.innerRef}>
-                                    {expenses.map((expense, index) => {
+                                    {displayItems.map((item, visualIndex) => {
+                                        if (item.displayType === 'tithe') {
+                                            return (
+                                                <TableRow
+                                                    key={item.id}
+                                                    className="bg-gradient-to-r from-yellow-500/10 via-amber-500/5 to-yellow-500/10 hover:from-yellow-500/20 hover:to-yellow-500/20 transition-all border-none rounded-lg shadow-sm border-l-4 border-l-amber-500"
+                                                >
+                                                    <TableCell className="rounded-l-lg border-y border-amber-500/20 text-amber-600/70 text-xs">-</TableCell>
+                                                    <TableCell className="border-y border-amber-500/20"><Crown className="h-5 w-5 text-amber-500 mx-auto fill-amber-500/20" /></TableCell>
+                                                    <TableCell className="font-bold text-amber-600 border-y border-amber-500/20 whitespace-normal text-base">{item.description}</TableCell>
+                                                    <TableCell className="border-y border-amber-500/20 font-medium text-amber-600/80">{item.dayOfMonth || "-"}</TableCell>
+                                                    <TableCell className="text-xs text-amber-600/70 border-y border-amber-500/20 w-[200px]">
+                                                        <SlideButton
+                                                            isConfirmed={item.isPaid}
+                                                            onConfirm={async () => await handleToggleTithe(item.originalId, !item.isPaid)}
+                                                            label="Arrastar para pagar"
+                                                            confirmedLabel="Pago"
+                                                            variant="misc"
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell className="text-right font-bold text-xl border-y border-amber-500/20 text-amber-600">{formatCurrency(item.amount)}</TableCell>
+                                                    <TableCell className="rounded-r-lg border-y border-r border-amber-500/20">
+                                                        {/* No actions for tithe */}
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        }
+
+                                        const expense = item as typeof expenses[0];
+                                        const expenseIndex = expenses.findIndex(e => e.id === expense.id);
                                         const total = Number(expense.totalAmount);
                                         const paid = Number(expense.paidAmount);
                                         const percentage = total > 0 ? (paid / total) * 100 : 0;
 
                                         return (
-                                            <Draggable key={expense.id} draggableId={expense.id} index={index}>
+                                            <Draggable key={expense.id} draggableId={expense.id} index={expenseIndex}>
                                                 {(provided, snapshot) => (
                                                     <TableRow
                                                         ref={provided.innerRef}
@@ -243,7 +281,7 @@ export function ExpenseList({
                                                         className={`bg-card hover:bg-card/80 transition-colors border-none rounded-lg shadow-sm group ${snapshot.isDragging ? "opacity-50" : ""}`}
                                                         style={{ ...provided.draggableProps.style, display: snapshot.isDragging ? "table" : undefined }}
                                                     >
-                                                        <TableCell className="rounded-l-lg border-y border-l border-border/50 text-muted-foreground/50 text-xs">{index + 1}</TableCell>
+                                                        <TableCell className="rounded-l-lg border-y border-l border-border/50 text-muted-foreground/50 text-xs">{expenseIndex + 1}</TableCell>
                                                         <TableCell className="border-y border-border/50">
                                                             <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-2 hover:bg-muted rounded transition-colors w-fit mx-auto touch-none">
                                                                 <GripVertical className="h-4 w-4 text-muted-foreground/50 group-hover:text-muted-foreground" />
@@ -261,7 +299,7 @@ export function ExpenseList({
                                                         </TableCell>
                                                         <TableCell className="text-right font-bold text-lg border-y border-border/50 text-rose-500">{formatCurrency(total)}</TableCell>
                                                         <TableCell className="rounded-r-lg border-y border-r border-border/50">
-                                                            <div className="flex items-center justify-end gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                                            <div className="flex items-center justify-end gap-1">
                                                                 <EditExpenseDialog expense={expense} />
                                                                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => handleDelete(expense.id)}>
                                                                     <Trash2 className="h-4 w-4" />
@@ -281,42 +319,49 @@ export function ExpenseList({
                 </div>
 
                 <div className="md:hidden space-y-2">
-                    {titheAmount > 0 && (
-                        <Card className="bg-gradient-to-r from-yellow-500/10 via-amber-500/5 to-yellow-500/10 border-amber-500/20 shadow-sm border-l-4 border-l-amber-500">
-                            <CardContent className="p-3 flex flex-col gap-3">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-amber-500/10 rounded-full"><Crown className="h-5 w-5 text-amber-500 fill-amber-500/20" /></div>
-                                        <div>
-                                            <p className="font-bold text-amber-600 text-base">Dízimo (10%)</p>
-                                            <p className="text-[10px] text-amber-600/70 uppercase tracking-wider">Primícias</p>
-                                        </div>
-                                    </div>
-                                    <p className="font-bold text-xl text-amber-600">{formatCurrency(titheAmount)}</p>
-                                </div>
-                                <div className="pt-2 border-t border-amber-500/10">
-                                    <SlideButton
-                                        isConfirmed={isTithePaidState}
-                                        onConfirm={async () => await handleToggleTithe(!isTithePaidState)}
-                                        label="Arrastar para pagar"
-                                        confirmedLabel="Pago"
-                                        className={isTithePaidState ? "bg-amber-500 text-white hover:bg-amber-600" : "bg-amber-500/10 text-amber-700 hover:bg-amber-500/20"}
-                                    />
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-
                     <Droppable droppableId="expenses-mobile">
                         {(provided) => (
                             <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
-                                {expenses.map((expense, index) => {
+                                {displayItems.map((item, visualIndex) => {
+                                    if (item.displayType === 'tithe') {
+                                        return (
+                                            <Card key={item.id} className="bg-gradient-to-r from-yellow-500/10 via-amber-500/5 to-yellow-500/10 border-amber-500/20 shadow-sm border-l-4 border-l-amber-500">
+                                                <CardContent className="p-3 flex flex-col gap-3">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="p-2 bg-amber-500/10 rounded-full"><Crown className="h-5 w-5 text-amber-500 fill-amber-500/20" /></div>
+                                                            <div>
+                                                                <p className="font-bold text-amber-600 text-base">{item.description}</p>
+                                                                <div className="flex items-center gap-1.5 text-xs text-amber-600/70 mt-0.5">
+                                                                    <Calendar className="h-2.5 w-2.5" />
+                                                                    <span>Dia {item.dayOfMonth || "-"}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <p className="font-bold text-xl text-amber-600">{formatCurrency(item.amount)}</p>
+                                                    </div>
+                                                    <div className="pt-2 border-t border-amber-500/10">
+                                                        <SlideButton
+                                                            isConfirmed={item.isPaid}
+                                                            onConfirm={async () => await handleToggleTithe(item.originalId, !item.isPaid)}
+                                                            label="Arrastar para pagar"
+                                                            confirmedLabel="Pago"
+                                                            variant="misc"
+                                                        />
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        );
+                                    }
+
+                                    const expense = item as typeof expenses[0];
+                                    const expenseIndex = expenses.findIndex(e => e.id === expense.id);
                                     const total = Number(expense.totalAmount);
                                     const paid = Number(expense.paidAmount);
                                     const percentage = total > 0 ? (paid / total) * 100 : 0;
 
                                     return (
-                                        <Draggable key={`mobile-${expense.id}`} draggableId={`mobile-${expense.id}`} index={index}>
+                                        <Draggable key={`mobile-${expense.id}`} draggableId={`mobile-${expense.id}`} index={expenseIndex}>
                                             {(provided, snapshot) => (
                                                 <Card
                                                     ref={provided.innerRef}
@@ -381,5 +426,3 @@ export function ExpenseList({
         </div>
     );
 }
-
-

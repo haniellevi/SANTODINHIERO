@@ -23,7 +23,16 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Configura√ß√µes
+  isTitheEnabled      Boolean @default(true)
+  planningAlertDays   Int     @default(5)
+  role                UserRole @default(USER)
+
+  // Relacionamentos
   months             Month[]
+  collaborators      Collaborator[] @relation("OwnerCollaborators")
+  collaborations     Collaborator[] @relation("MemberCollaborations")
+  feedbacks          Feedback[]
 
   @@index([email])
   @@index([name])
@@ -65,6 +74,7 @@ model Income {
   dayOfMonth  Int?
   order       Int      @default(0)
   isReceived  Boolean  @default(false)
+  isTithePaid Boolean  @default(false)
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -138,6 +148,7 @@ model Plan {
   priceYearlyCents    Int?
   description         String?  @db.Text
   features            String?  @db.Text // JSON string
+  maxCollaborators    Int      @default(0)
   badge               String?
   highlight           Boolean  @default(false)
   ctaType             String?  @default("checkout") // 'checkout' or 'contact'
@@ -172,3 +183,66 @@ enum ExpenseType {
   INVESTMENT_TOTAL
   MISC_TOTAL
 }
+
+model Collaborator {
+  id          String   @id @default(cuid())
+  
+  ownerId     String
+  owner       User     @relation("OwnerCollaborators", fields: [ownerId], references: [id])
+  
+  email       String   // Email do convidado
+  userId      String?  // ID do usu·rio convidado (se j· tiver conta)
+  user        User?    @relation("MemberCollaborations", fields: [userId], references: [id])
+  
+  status      InviteStatus @default(PENDING)
+  permission  Permission   @default(VIEWER)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([ownerId, email])
+}
+
+model Feedback {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  type        FeedbackType
+  message     String   @db.Text
+  status      FeedbackStatus @default(OPEN)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum Permission {
+  VIEWER
+  EDITOR
+  ADMIN
+}
+
+enum FeedbackType {
+  BUG
+  FEATURE_REQUEST
+  OTHER
+}
+
+enum FeedbackStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+

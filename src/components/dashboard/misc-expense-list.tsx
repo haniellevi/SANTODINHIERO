@@ -165,17 +165,17 @@ export function MiscExpenseList({ miscExpenses: initialMiscExpenses }: MiscExpen
                                                         </span>
                                                     </TableCell>
                                                     <TableCell className="rounded-r-xl border-y border-r border-white/5 pr-4">
-                                                        <div className="flex items-center justify-end gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200">
+                                                        <div className="flex items-center justify-end gap-1">
                                                             <Button
-                                                                variant="ghost"
+                                                                variant={miscExpense.isPaid ? "default" : "outline"}
                                                                 size="icon"
-                                                                className={`h-8 w-8 rounded-lg transition-all ${miscExpense.isPaid
-                                                                    ? "text-yellow-500 bg-yellow-500/10 hover:bg-yellow-500/20"
-                                                                    : "text-muted-foreground hover:text-yellow-500 hover:bg-yellow-500/10"
+                                                                className={`h-8 w-8 rounded-full transition-all ${miscExpense.isPaid
+                                                                    ? "bg-amber-500 hover:bg-amber-600 text-white shadow-md shadow-amber-500/20 border-transparent"
+                                                                    : "text-muted-foreground hover:text-amber-500 hover:border-amber-500/50 hover:bg-amber-500/5"
                                                                     }`}
                                                                 onClick={() => handleTogglePaid(miscExpense.id, miscExpense.isPaid)}
                                                             >
-                                                                <CheckCircle2 className={`h-4 w-4 ${miscExpense.isPaid ? "fill-current" : ""}`} />
+                                                                <CheckCircle2 className="h-4 w-4" />
                                                             </Button>
                                                             <EditMiscExpenseDialog miscExpense={miscExpense} />
                                                             <Button
@@ -271,5 +271,3 @@ export function MiscExpenseList({ miscExpenses: initialMiscExpenses }: MiscExpen
         </div>
     );
 }
-
-

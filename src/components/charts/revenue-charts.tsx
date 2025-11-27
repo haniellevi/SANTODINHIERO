@@ -30,19 +30,19 @@ function StatsLegend({ data, prefix = '', suffix = '' }: { data: Point[]; prefix
   const total = sum(data.map(d => d.value))
 
   return (
-    <div className="flex items-center gap-3 text-xs">
+    <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-[10px] sm:text-xs mb-2">
       <div className="flex items-center gap-1">
-        <span className="inline-block size-2 rounded-sm bg-primary" />
+        <span className="inline-block size-2 rounded-full bg-primary" />
         <span className="text-muted-foreground">Latest:</span>
         <span className="font-medium text-foreground">{prefix}{last.toFixed(0)}{suffix}</span>
       </div>
       <div className="flex items-center gap-1">
-        <span className="inline-block size-2 rounded-sm bg-foreground/40" />
+        <span className="inline-block size-2 rounded-full bg-foreground/40" />
         <span className="text-muted-foreground">Avg:</span>
         <span className="font-medium text-foreground">{prefix}{avg.toFixed(0)}{suffix}</span>
       </div>
       <div className="flex items-center gap-1">
-        <span className="inline-block size-2 rounded-sm bg-foreground/20" />
+        <span className="inline-block size-2 rounded-full bg-foreground/20" />
         <span className="text-muted-foreground">Total:</span>
         <span className="font-medium text-foreground">{prefix}{total.toFixed(0)}{suffix}</span>
       </div>
@@ -71,21 +71,21 @@ function ValueTooltip({ active, payload, label, prefix = '', suffix = '' }: {
 
 export function MrrBarChart({ data }: { data: Point[] }) {
   return (
-    <div className="h-56 w-full">
+    <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <RBarChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 8 }} barCategoryGap={18}>
+        <RBarChart data={data} margin={{ top: 20, right: 12, left: 0, bottom: 0 }} barCategoryGap={18}>
           <defs>
             <linearGradient id="mrrGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.9" />
               <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.2" />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} />
-          <XAxis dataKey="label" tickLine={false} axisLine={false} />
-          <YAxis tickLine={false} axisLine={false} width={36} />
+          <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} vertical={false} />
+          <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} dy={10} />
+          <YAxis tickLine={false} axisLine={false} width={40} tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
           <Tooltip cursor={{ fill: 'hsl(var(--muted))', opacity: 0.2 }} content={<ValueTooltip prefix="$" />} />
-          <Legend verticalAlign="top" align="right" content={<StatsLegend data={data} prefix="$" />} />
-          <Bar dataKey="value" fill="url(#mrrGradient)" radius={[8, 8, 4, 4]} />
+          <Legend verticalAlign="top" align="right" content={<StatsLegend data={data} prefix="$" />} wrapperStyle={{ paddingBottom: '20px' }} />
+          <Bar dataKey="value" fill="url(#mrrGradient)" radius={[4, 4, 0, 0]} />
         </RBarChart>
       </ResponsiveContainer>
     </div>
@@ -94,21 +94,21 @@ export function MrrBarChart({ data }: { data: Point[] }) {
 
 export function ArrBarChart({ data }: { data: Point[] }) {
   return (
-    <div className="h-56 w-full">
+    <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <RBarChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 8 }} barCategoryGap={18}>
+        <RBarChart data={data} margin={{ top: 20, right: 12, left: 0, bottom: 0 }} barCategoryGap={18}>
           <defs>
             <linearGradient id="arrGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.9" />
               <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.2" />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} />
-          <XAxis dataKey="label" tickLine={false} axisLine={false} />
-          <YAxis tickLine={false} axisLine={false} width={40} />
+          <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} vertical={false} />
+          <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} dy={10} />
+          <YAxis tickLine={false} axisLine={false} width={45} tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
           <Tooltip cursor={{ fill: 'hsl(var(--muted))', opacity: 0.2 }} content={<ValueTooltip prefix="$" />} />
-          <Legend verticalAlign="top" align="right" content={<StatsLegend data={data} prefix="$" />} />
-          <Bar dataKey="value" fill="url(#arrGradient)" radius={[8, 8, 4, 4]} />
+          <Legend verticalAlign="top" align="right" content={<StatsLegend data={data} prefix="$" />} wrapperStyle={{ paddingBottom: '20px' }} />
+          <Bar dataKey="value" fill="url(#arrGradient)" radius={[4, 4, 0, 0]} />
         </RBarChart>
       </ResponsiveContainer>
     </div>
@@ -117,21 +117,21 @@ export function ArrBarChart({ data }: { data: Point[] }) {
 
 export function ChurnLineChart({ data }: { data: Point[] }) {
   return (
-    <div className="h-56 w-full">
+    <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <RLineChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 8 }}>
+        <RLineChart data={data} margin={{ top: 20, right: 12, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="churnStroke" x1="0" y1="0" x2="1" y2="0">
               <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="1" />
               <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.6" />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} />
-          <XAxis dataKey="label" tickLine={false} axisLine={false} />
-          <YAxis tickLine={false} axisLine={false} width={40} domain={[0, 'auto']} />
+          <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} vertical={false} />
+          <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} dy={10} />
+          <YAxis tickLine={false} axisLine={false} width={40} domain={[0, 'auto']} tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
           <Tooltip cursor={{ stroke: 'hsl(var(--muted-foreground))', strokeWidth: 1 }} content={<ValueTooltip suffix="%" />} />
-          <Legend verticalAlign="top" align="right" content={<StatsLegend data={data} suffix="%" />} />
-          <Line type="monotone" dataKey="value" stroke="url(#churnStroke)" strokeWidth={2.25} dot={{ r: 3.5, strokeWidth: 1, stroke: 'hsl(var(--background))' }} activeDot={{ r: 5 }} />
+          <Legend verticalAlign="top" align="right" content={<StatsLegend data={data} suffix="%" />} wrapperStyle={{ paddingBottom: '20px' }} />
+          <Line type="monotone" dataKey="value" stroke="url(#churnStroke)" strokeWidth={2.5} dot={{ r: 4, strokeWidth: 2, stroke: 'hsl(var(--background))', fill: 'hsl(var(--primary))' }} activeDot={{ r: 6, strokeWidth: 0 }} />
         </RLineChart>
       </ResponsiveContainer>
     </div>

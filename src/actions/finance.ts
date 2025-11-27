@@ -439,3 +439,11 @@ export async function toggleMiscExpensePaid(id: string, isPaid: boolean) {
     revalidatePath("/dashboard");
 }
 
+
+export async function toggleIncomeTithePaid(incomeId: string, isTithePaid: boolean) {
+    await prisma.income.update({
+        where: { id: incomeId },
+        data: { isTithePaid },
+    });
+    revalidatePath("/dashboard");
+}

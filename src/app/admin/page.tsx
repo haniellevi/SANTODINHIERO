@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { MrrBarChart, ArrBarChart, ChurnLineChart } from "@/components/charts/revenue-charts";
 import { useDashboard } from "@/hooks/use-dashboard";
+import dynamic from "next/dynamic";
 
 export default function AdminDashboard() {
   const { data: stats, isLoading, error } = useDashboard();
@@ -79,6 +80,64 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
+      {/* BI Metrics - New Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-muted-foreground text-sm">Novos Usuários (Mês)</p>
+              <p className="text-2xl font-bold text-foreground mt-1">
+                {stats?.newUsersThisMonth || 0}
+              </p>
+            </div>
+            <TrendingUp className="h-8 w-8 text-emerald-500" />
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-muted-foreground text-sm">Volume Total (TTV)</p>
+              <p className="text-2xl font-bold text-foreground mt-1">
+                {stats?.totalTTV ? `R$ ${stats.totalTTV.toFixed(2)}` : 'R$ 0,00'}
+              </p>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500"><line x1="12" x2="12" y1="2" y2="22" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+          </div>
+          <div className="mt-4 flex items-center text-sm">
+            <span className="text-muted-foreground">Todas as receitas registradas</span>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-muted-foreground text-sm">Volume de Dízimos</p>
+              <p className="text-2xl font-bold text-foreground mt-1">
+                {stats?.totalTitheVolume ? `R$ ${stats.totalTitheVolume.toFixed(2)}` : 'R$ 0,00'}
+              </p>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-500"><path d="M6 3h12l4 6-10 13L2 9Z" /><path d="M11 3 8 9l4 13 4-13-3-6Z" /></svg>
+          </div>
+          <div className="mt-4 flex items-center text-sm">
+            <span className="text-muted-foreground">Total pago em dízimos</span>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-muted-foreground text-sm">Feedbacks Recentes</p>
+              <p className="text-2xl font-bold text-foreground mt-1">
+                {stats?.recentFeedbacks?.length || 0}
+              </p>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+          </div>
+        </Card>
+      </div>
+
+      {/* Charts Row - Business Metrics */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="p-6">
           <div className="mb-4 flex items-center justify-between gap-3">
@@ -113,9 +172,61 @@ export default function AdminDashboard() {
           {stats?.churnSeries && <ChurnLineChart data={stats.churnSeries} />}
         </Card>
       </div>
+
+      {/* BI Charts & Feedbacks Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">
+        {/* Expense Distribution Chart */}
+        <div className="col-span-4">
+          <Card className="p-6">
+            <div className="mb-4">
+              <h2 className="text-xl font-semibold text-foreground">Distribuição de Despesas</h2>
+              <p className="text-sm text-muted-foreground">Por tipo de despesa</p>
+            </div>
+            {stats?.expenseDistribution && stats.expenseDistribution.length > 0 ? (
+              <div className="h-[300px]">
+                <ExpenseDistributionPieChart data={stats.expenseDistribution} />
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">Nenhuma despesa registrada</p>
+            )}
+          </Card>
+        </div>
+
+        {/* Recent Feedbacks */}
+        <Card className="col-span-3 p-6">
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold text-foreground">Feedbacks Recentes</h2>
+          </div>
+          <div className="space-y-4">
+            {stats?.recentFeedbacks && stats.recentFeedbacks.length > 0 ? (
+              stats.recentFeedbacks.map((feedback) => (
+                <div key={feedback.id} className="border-b border-border pb-3 last:border-0">
+                  <p className="text-sm font-medium">{feedback.user.name || feedback.user.email}</p>
+                  <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{feedback.message}</p>
+                  <div className="flex gap-2 mt-2">
+                    <span className="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium border-muted bg-muted/50 text-foreground/60">
+                      {feedback.type}
+                    </span>
+                    <span className="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium border-muted bg-muted/50 text-foreground/60">
+                      {feedback.status}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">Nenhum feedback recente</p>
+            )}
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }
+
+const ExpenseDistributionPieChart = dynamic(
+  () => import('@/components/admin/expense-distribution-chart').then(mod => mod.ExpenseDistributionPieChart),
+  { ssr: false }
+);
 
 function DeltaBadge({ series, goodWhenPositive = true, suffix = "" }: { series: { label: string; value: number }[]; goodWhenPositive?: boolean; suffix?: string }) {
   if (!series || series.length < 2) return null
@@ -135,8 +246,8 @@ function DeltaBadge({ series, goodWhenPositive = true, suffix = "" }: { series: 
         (color === 'emerald'
           ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600'
           : color === 'red'
-          ? 'border-red-500/20 bg-red-500/10 text-red-600'
-          : 'border-muted bg-muted/50 text-foreground/60')
+            ? 'border-red-500/20 bg-red-500/10 text-red-600'
+            : 'border-muted bg-muted/50 text-foreground/60')
       }
       title="Variação mês a mês"
     >
@@ -144,5 +255,3 @@ function DeltaBadge({ series, goodWhenPositive = true, suffix = "" }: { series: 
     </span>
   )
 }
-
-// Removed seed/backfill demo buttons to simplify admin surface
