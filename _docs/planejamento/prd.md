@@ -2,122 +2,79 @@
 
 ## 1. Visão Geral do Produto
 
-**Santo Dinheiro** é uma aplicação de gestão financeira pessoal focada em simplicidade e eficiência ("mobile-first"). O objetivo é permitir que usuários controlem suas finanças mensais e anuais, rastreando receitas, despesas, investimentos e gastos avulsos de forma organizada. A aplicação se destaca pela automatização de cálculos (como dízimo) e pela facilidade de planejamento do mês seguinte.
+**Santo Dinheiro** é uma aplicação de gestão financeira pessoal de alta performance, projetada com uma filosofia "mobile-first" e estética premium. O sistema oferece controle total sobre finanças mensais e anuais, integrando receitas, despesas, investimentos e gastos variáveis em uma interface fluida e intuitiva. O diferencial reside na experiência do usuário (UX) refinada, com automações inteligentes (como o cálculo de dízimo) e ferramentas de planejamento financeiro avançado.
 
 ### 1.1. Missão
-Empoderar indivíduos a terem controle total sobre suas finanças através de uma ferramenta intuitiva que facilita o planejamento e o acompanhamento de gastos.
+Capacitar indivíduos a alcançarem a liberdade financeira através de uma ferramenta elegante e poderosa, que transforma a gestão de gastos em uma experiência simples e visualmente gratificante.
 
 ### 1.2. Público-Alvo
-Pessoas que desejam organizar suas finanças pessoais, controlar gastos mensais, planejar investimentos e ter uma visão clara de sua saúde financeira, preferencialmente usando dispositivos móveis.
+Usuários exigentes que buscam mais do que uma planilha: desejam uma aplicação moderna, responsiva e esteticamente agradável para gerenciar seu patrimônio, controlar o fluxo de caixa mensal e planejar o futuro financeiro diretamente de seus dispositivos móveis.
 
-## 2. Funcionalidades Principais
+## 2. Funcionalidades Principais (Implementadas)
 
-### 2.1. Landing Page (Página Inicial)
-- **Objetivo:** Apresentar o produto, destacar benefícios e converter visitantes em usuários.
-- **Design:** Utilizar a identidade visual premium do Starter Kit (Magic UI, animações, tipografia moderna).
-- **Seções:** Hero section com CTA claro, Features (funcionalidades), Depoimentos (social proof), Pricing (se houver planos futuros) e Footer.
-- **Acesso:** Rota raiz `/` (pública).
+### 2.1. Dashboard Financeiro (Área Protegida)
+- **Visão Geral Financeira:** Cards de resumo com totais de Receitas, Despesas, Investimentos e Saldo Atual.
+- **Previsão de Saldo:** Cálculo inteligente do saldo previsto para o dia atual ("Saldo do Dia"), considerando todas as transações (receitas, despesas, investimentos, gastos avulsos) agendadas para hoje ou antes, independentemente do status de pagamento.
+- **Navegação Temporal:** Seletor de mês/ano intuitivo para transição rápida entre períodos financeiros.
+- **Ações Rápidas:** Botões de acesso imediato para adicionar transações.
 
-### 2.2. Autenticação e Gestão de Usuários
-- **Cadastro (Sign Up):** Usuários podem criar uma conta usando e-mail, senha ou social login (Google, etc.).
-- **Login (Sign In):** Acesso seguro à conta.
-- **Logout:** Encerramento seguro da sessão.
-- **Perfil:** Gestão de conta via componente do Clerk.
-- **Tecnologia:** **Clerk** (integrado ao Starter Kit).
+### 2.2. Gestão de Receitas (Incomes)
+- **Registro Detalhado:** Inclusão de receitas com descrição, valor e data prevista.
+- **Status de Recebimento:** Checkbox interativo para marcar receitas como "Recebidas", atualizando o saldo em tempo real.
+- **Interface Visual:** Listagem clara com indicadores visuais de status (verde para recebido).
 
-### 2.3. Dashboard Financeiro (Área Protegida)
-- **Visão Geral:** Resumo do mês atual com totais de receitas, despesas, investimentos e saldo restante.
-- **Navegação Mensal:** Facilidade para alternar entre meses e anos.
-- **Criação de Mês:** Funcionalidade para iniciar um novo mês, copiando dados recorrentes do mês anterior (opcional) ou iniciando do zero.
+### 2.3. Gestão de Despesas (Expenses)
+- **Categorização Inteligente:**
+    - **Despesas Fixas:** Contas recorrentes (aluguel, internet, etc.).
+    - **Dízimo Premium:** Card especial com destaque dourado ("Golden Aesthetic"), cálculo automático de 10% sobre as receitas e toggle de pagamento com feedback visual rico.
+    - **Saída Total:** O card de "Despesas" no dashboard exibe o somatório total de Despesas Fixas + Dízimo + Investimentos + Gastos Avulsos, oferecendo uma visão real de tudo que sai da conta.
+- **Lista Limpa:** A lista de despesas exibe apenas os itens cadastrados como despesa e o Dízimo. Investimentos e Gastos Avulsos não aparecem como linhas agregadas para evitar poluição visual, mas seus valores compõem o total.
+- **Cards Compactos (Mobile):** Layout otimizado para exibir múltiplas despesas em uma única tela sem rolagem excessiva.
+- **Slide-to-Pay:** Botão deslizante para confirmar pagamentos, prevenindo toques acidentais e adicionando satisfação tátil.
+- **Cálculo em Cascata:** Visualização do "Saldo Restante" após cada despesa, permitindo priorização de pagamentos.
 
-### 2.4. Gestão de Receitas (Incomes)
-- **Adicionar Receita:** Inserir descrição, valor, dia do recebimento.
-- **Listagem:** Visualizar todas as receitas do mês.
-- **Edição/Exclusão:** Modificar ou remover receitas.
-- **Ordenação:** Drag-and-drop para organizar a prioridade ou ordem de visualização.
+### 2.4. Gestão de Investimentos
+- **Aportes Mensais:** Registro de investimentos com meta e valor realizado.
+- **Integração de Fluxo:** O valor total dos investimentos é automaticamente deduzido do orçamento mensal como uma "despesa" de construção de patrimônio.
+- **Status de Aporte:** Controle de efetivação do investimento.
 
-### 2.5. Gestão de Despesas (Expenses)
-- **Tipos de Despesa:**
-    - **Padrão (Standard):** Contas fixas e variáveis (ex: aluguel, luz, mercado).
-    - **Dízimo (Tithe):** Cálculo automático de 10% sobre o total de receitas (configurável como o primeiro item).
-    - **Total de Investimentos:** Agregado automático da seção de investimentos.
-    - **Total de Gastos Avulsos:** Agregado automático da seção de gastos avulsos.
-- **Funcionalidades:**
-    - **Adicionar Despesa:** Descrição, valor total, valor pago (para pagamentos parciais), dia de vencimento.
-    - **Status de Pagamento:** Acompanhamento do quanto já foi pago vs. valor total.
-    - **Saldo Restante:** Cálculo automático do valor que sobra após pagar as despesas listadas até o momento (efeito cascata).
-    - **Ordenação:** Drag-and-drop para priorização de pagamentos.
+### 2.5. Gestão de Gastos Avulsos (Misc Expenses)
+- **Controle de Variáveis:** Registro de gastos não planejados ou variáveis.
+- **Impacto no Orçamento:** Visualização clara de como os gastos supérfluos impactam o saldo final.
 
-### 2.6. Gestão de Investimentos
-- **Adicionar Investimento:** Descrição, valor, dia.
-- **Integração:** O total investido aparece automaticamente como uma despesa no quadro principal.
-
-### 2.7. Gestão de Gastos Avulsos (Misc Expenses)
-- **Adicionar Gasto Avulso:** Descrição, valor, dia.
-- **Integração:** O total de gastos avulsos aparece automaticamente como uma despesa no quadro principal.
-
-### 2.8. Planejamento e Alertas
-- **Alerta de Novo Mês:** Notificação ou destaque visual quando o mês está acabando para incentivar o planejamento do próximo.
-- **Duplicação de Mês:** Facilidade para clonar a estrutura de gastos fixos para o mês seguinte.
+### 2.6. Planejamento e UX Avançada
+- **Optimistic UI:** Atualizações instantâneas na interface antes mesmo da confirmação do servidor, garantindo sensação de rapidez extrema.
+- **Feedback Visual:** Toasts e animações sutis para confirmar ações (salvar, excluir, pagar).
+- **Design Responsivo:** Adaptação perfeita para mobile, com elementos de toque (touch targets) otimizados.
 
 ## 3. Requisitos Não-Funcionais
 
-- **Mobile-First:** Interface otimizada para telas pequenas, com botões acessíveis e layouts responsivos.
-- **Performance:** Carregamento rápido de dados (Server Components) e transições suaves.
-- **Segurança:** Proteção de dados sensíveis, comunicação via HTTPS, autenticação robusta (Clerk).
-- **Usabilidade:** Interface limpa, intuitiva e com feedback visual claro (Toasts, Skeletons).
-- **Disponibilidade:** Aplicação hospedada em ambiente de alta disponibilidade (Vercel).
+- **Mobile-First & Touch-Friendly:** Interface desenhada primariamente para uso em smartphones, com gestos e layouts ergonômicos.
+- **Performance:** Carregamento instantâneo utilizando React Server Components e estratégias de cache do Next.js 15.
+- **Segurança:** Autenticação robusta via Clerk, proteção de rotas e validação de dados com Zod.
+- **Estética Premium:** Uso de sombras suaves, gradientes, glassmorphism e uma paleta de cores refinada (Roxo Profundo, Dourado, Verde Esmeralda).
 
-## 4. Stack Tecnológico (Baseado no Starter Kit)
+## 4. Stack Tecnológico
 
-- **Frontend:** Next.js 15 (App Router), React 19.
-- **Estilização:** Tailwind CSS v4, Radix UI, Shadcn UI, Framer Motion, Lucide React.
-- **Backend:** Server Actions, API Routes, Prisma ORM v6.
-- **Banco de Dados:** PostgreSQL (via Prisma).
+- **Frontend:** Next.js 15 (App Router), React 19, TypeScript.
+- **Estilização:** Tailwind CSS v4, Shadcn UI, Framer Motion (animações), Lucide React (ícones).
+- **Backend:** Server Actions, Prisma ORM v6.
+- **Banco de Dados:** PostgreSQL (Supabase).
 - **Autenticação:** Clerk.
-- **Hospedagem:** Vercel.
-- **Gerenciamento de Estado:** React Query (TanStack Query) para dados do cliente, Server Components para dados iniciais.
+- **Deploy:** Vercel.
 
-## 5. Design e UX
+## 5. Design System
 
-O design da aplicação deve seguir estritamente os protótipos fornecidos, garantindo fidelidade visual e consistência, mas adaptado para usar os componentes do sistema de design existente (Shadcn/Radix) para manter a coerência com o Starter Kit.
+### 5.1. Diretrizes Visuais
+- **Tipografia:** **Manrope** para títulos e corpo, garantindo legibilidade e modernidade.
+- **Cores:**
+  - **Primária:** Roxo (#7c3aed) para ações principais e branding.
+  - **Destaque (Dízimo):** Dourado/Amarelo (#fbbf24) para diferenciar a contribuição.
+  - **Sucesso:** Verde (#22c55e) para receitas e pagamentos efetuados.
+  - **Alerta/Erro:** Vermelho (#ef4444) para despesas pendentes ou atrasadas.
+  - **Background:** Modos Claro e Escuro totalmente suportados, com preferência para o Dark Mode para elegância.
 
-### 5.1. Referências de Design (Protótipos)
-Os arquivos HTML a seguir contêm a definição exata de layout, cores, tipografia e componentes para cada seção:
-
-- **Adicionar Entrada:** `designer/adicionar_entrada/entrada.html`
-- **Adicionar Saída:** `designer/adicionar_saída/saida.html`
-- **Dashboard Mensal:** `designer/dashboard_mensal/dashboard.html`
-- **Gastos Avulsos:** `designer/gastos_avulsos/gastos_avulsos.html`
-- **Investimentos:** `designer/investimentos/investimentos.html`
-- **Registro de Entradas:** `designer/registro_de_entradas/registros_de_entradas.html`
-- **Registro de Saídas:** `designer/registro_de_saídas/registro_de_saida.html`
-
-### 5.2. Diretrizes Visuais (Design System)
-
-- **Tipografia:**
-  - Fonte Principal: **Manrope** (Google Fonts) ou **Inter** (Padrão do Kit) - *Decisão: Manter Manrope se essencial para a marca, ou migrar para Inter para consistência total.*
-  - Pesos: 400 (Regular), 500 (Medium), 600 (SemiBold), 700 (Bold), 800 (ExtraBold).
-
-- **Ícones:**
-  - Biblioteca: **Lucide React** (Padrão do Kit) - *Substituir Material Symbols onde possível para consistência, ou importar Material Symbols se o design exigir estritamente.*
-
-- **Paleta de Cores (Tailwind CSS):**
-  - **Modo Escuro (Dark Mode):** Suporte nativo via classe `.dark`.
-  - **Cores Primárias:** Tons de Roxo (ex: `#7f13ec`, `#8A2BE2`, `#7C3AED`).
-  - **Sucesso (Receitas/Entradas):** Tons de Verde (ex: `#0bda73`, `#22C55E`).
-  - **Perigo/Destrutivo (Despesas/Saídas):** Tons de Vermelho (ex: `#FF4545`, `#E57373`, `#DC2626`).
-  - **Backgrounds:**
-    - Light: `#f7f6f8` / `#F7F2FF`
-    - Dark: `#191022` / `#12101E` / `#0C0A12`
-
-- **Componentes de UI:**
-  - **Botões:** Cantos arredondados (`rounded-xl` ou `rounded-full`), altura generosa para toque (mobile-friendly).
-  - **Inputs:** Estilo moderno, sem bordas agressivas, foco com anel colorido (`ring`).
-  - **Cards:** Uso de sombras suaves e fundos contrastantes para agrupar informações.
-  - **Listas:** Itens com ícones representativos à esquerda e valores à direita.
-
-### 5.3. Navegação e Layout
-- **Header:** Fixo ou sticky no topo, contendo título da seção e botão de voltar.
-- **Footer:** Fixo na parte inferior para ações principais (ex: "Salvar", "Confirmar"), garantindo fácil acesso com o polegar.
-- **Responsividade:** Layout fluido que se adapta a diferentes larguras de tela, priorizando a experiência em dispositivos móveis (largura total, elementos empilhados verticalmente).
+### 5.2. Componentes Chave
+- **Cards:** Container principal para informações, com bordas sutis e sombras de elevação.
+- **Badges:** Indicadores de status (Pago, Pendente, Recebido).
+- **Progress Bars:** Visualização de metas e limites de gastos.

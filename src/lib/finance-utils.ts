@@ -38,7 +38,26 @@ export function calculateTotals(month: MonthWithDetails | null): FinancialTotals
     // Let's sum the expenses that are explicitly in the expenses table.
     // Assuming the backend/frontend syncs the aggregate rows, or we calculate them on the fly.
     // For now, let's sum what's in the expenses array.
-    const totalExpense = month.expenses.reduce((acc, item) => acc + Number(item.totalAmount), 0);
+    const expensesSum = month.expenses.reduce((acc, item) => acc + Number(item.totalAmount), 0);
+
+    // Total Expense for the dashboard should include EVERYTHING that goes out
+    // Expenses (Standard + Tithe) + Investments + Misc
+    // Note: If 'expenses' array ALREADY includes rows for Investment Total and Misc Total, we would be double counting.
+    // Based on previous context, we are REMOVING those aggregate rows from the UI list, so they might not be in the DB as 'Expense' rows anymore, 
+    // OR we are just hiding them. 
+    // If they are in the DB, we should filter them out or sum carefully.
+    // Looking at the schema, ExpenseType has INVESTMENT_TOTAL and MISC_TOTAL.
+    // If we rely on the 'expenses' array having these, we sum them. 
+    // BUT the plan says "O conta somatoria da saida no dashboard deve ser SAIDA TOTAL (Saida+Investimentos+gastos avulsos)".
+    // This implies we should sum them explicitly if they are separate entities.
+    // Let's assume 'expenses' contains STANDARD and TITHE. 
+    // We should check if 'expenses' contains INVESTMENT_TOTAL or MISC_TOTAL and exclude them if we are adding totalInvestment and totalMisc separately.
+
+    const standardAndTitheExpenses = month.expenses
+        .filter(e => e.type === "STANDARD" || e.type === "TITHE")
+        .reduce((acc, item) => acc + Number(item.totalAmount), 0);
+
+    const totalExpense = standardAndTitheExpenses + totalInvestment + totalMisc;
 
     const balance = totalIncome - totalExpense;
     const titheAmount = totalIncome * 0.1;

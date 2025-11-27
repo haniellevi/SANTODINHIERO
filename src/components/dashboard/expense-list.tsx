@@ -200,7 +200,7 @@ export function ExpenseList({
                             </TableRow>
                         </TableHeader>
 
-                        {(titheAmount > 0 || totalInvestment > 0 || totalMisc > 0) && (
+                        {(titheAmount > 0) && (
                             <TableBody>
                                 {titheAmount > 0 && (
                                     <TableRow className="bg-gradient-to-r from-yellow-500/10 via-amber-500/5 to-yellow-500/10 hover:from-yellow-500/20 hover:to-yellow-500/20 transition-all border-none rounded-lg shadow-sm border-l-4 border-l-amber-500">
@@ -220,32 +220,6 @@ export function ExpenseList({
                                         <TableCell className="text-right font-bold text-xl border-y border-amber-500/20 text-amber-600">{formatCurrency(titheAmount)}</TableCell>
                                         <TableCell className="rounded-r-lg border-y border-r border-amber-500/20">
                                             <Button variant="ghost" size="icon" disabled className="h-8 w-8 text-amber-500/50"><Lock className="h-4 w-4" /></Button>
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                                {totalInvestment > 0 && (
-                                    <TableRow className="bg-blue-950/10 hover:bg-blue-950/20 transition-colors border-none rounded-lg shadow-sm">
-                                        <TableCell className="rounded-l-lg border-y border-l border-blue-500/20 text-blue-500/50 text-xs">-</TableCell>
-                                        <TableCell className="border-y border-blue-500/20"><Lock className="h-4 w-4 text-blue-500/50 mx-auto" /></TableCell>
-                                        <TableCell className="font-medium text-blue-400 border-y border-blue-500/20 whitespace-normal">Total Investimentos</TableCell>
-                                        <TableCell className="border-y border-blue-500/20">-</TableCell>
-                                        <TableCell className="text-xs text-blue-400/70 border-y border-blue-500/20">Agregado</TableCell>
-                                        <TableCell className="text-right font-bold text-lg text-blue-400 border-y border-blue-500/20">{formatCurrency(totalInvestment)}</TableCell>
-                                        <TableCell className="rounded-r-lg border-y border-r border-blue-500/20">
-                                            <Button variant="ghost" size="icon" disabled className="h-8 w-8 text-blue-400/50"><Lock className="h-4 w-4" /></Button>
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                                {totalMisc > 0 && (
-                                    <TableRow className="bg-orange-950/10 hover:bg-orange-950/20 transition-colors border-none rounded-lg shadow-sm">
-                                        <TableCell className="rounded-l-lg border-y border-l border-orange-500/20 text-orange-500/50 text-xs">-</TableCell>
-                                        <TableCell className="border-y border-orange-500/20"><Lock className="h-4 w-4 text-orange-500/50 mx-auto" /></TableCell>
-                                        <TableCell className="font-medium text-orange-400 border-y border-orange-500/20 whitespace-normal">Total Gastos Avulsos</TableCell>
-                                        <TableCell className="border-y border-orange-500/20">-</TableCell>
-                                        <TableCell className="text-xs text-orange-400/70 border-y border-orange-500/20">Agregado</TableCell>
-                                        <TableCell className="text-right font-bold text-lg text-orange-400 border-y border-orange-500/20">{formatCurrency(totalMisc)}</TableCell>
-                                        <TableCell className="rounded-r-lg border-y border-r border-orange-500/20">
-                                            <Button variant="ghost" size="icon" disabled className="h-8 w-8 text-orange-400/50"><Lock className="h-4 w-4" /></Button>
                                         </TableCell>
                                     </TableRow>
                                 )}
@@ -329,34 +303,6 @@ export function ExpenseList({
                                         className={isTithePaidState ? "bg-amber-500 text-white hover:bg-amber-600" : "bg-amber-500/10 text-amber-700 hover:bg-amber-500/20"}
                                     />
                                 </div>
-                            </CardContent>
-                        </Card>
-                    )}
-                    {totalInvestment > 0 && (
-                        <Card className="bg-blue-950/10 border-blue-500/20 shadow-sm">
-                            <CardContent className="p-3 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <div className="p-1.5 bg-blue-500/10 rounded-full"><Lock className="h-3.5 w-3.5 text-blue-500" /></div>
-                                    <div>
-                                        <p className="font-medium text-sm text-blue-400">Total Investimentos</p>
-                                        <p className="text-[10px] text-blue-400/70 uppercase tracking-wider">Agregado</p>
-                                    </div>
-                                </div>
-                                <p className="font-bold text-base text-blue-400">{formatCurrency(totalInvestment)}</p>
-                            </CardContent>
-                        </Card>
-                    )}
-                    {totalMisc > 0 && (
-                        <Card className="bg-orange-950/10 border-orange-500/20 shadow-sm">
-                            <CardContent className="p-3 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <div className="p-1.5 bg-orange-500/10 rounded-full"><Lock className="h-3.5 w-3.5 text-orange-500" /></div>
-                                    <div>
-                                        <p className="font-medium text-sm text-orange-400">Total Gastos Avulsos</p>
-                                        <p className="text-[10px] text-orange-400/70 uppercase tracking-wider">Agregado</p>
-                                    </div>
-                                </div>
-                                <p className="font-bold text-base text-orange-400">{formatCurrency(totalMisc)}</p>
                             </CardContent>
                         </Card>
                     )}
