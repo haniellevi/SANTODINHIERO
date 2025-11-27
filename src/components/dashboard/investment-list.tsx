@@ -165,17 +165,17 @@ export function InvestmentList({ investments: initialInvestments }: InvestmentLi
                                                         </span>
                                                     </TableCell>
                                                     <TableCell className="rounded-r-xl border-y border-r border-white/5 pr-4">
-                                                        <div className="flex items-center justify-end gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200">
+                                                        <div className="flex items-center justify-end gap-1">
                                                             <Button
-                                                                variant="ghost"
+                                                                variant={investment.isPaid ? "default" : "outline"}
                                                                 size="icon"
-                                                                className={`h-8 w-8 rounded-lg transition-all ${investment.isPaid
-                                                                    ? "text-blue-500 bg-blue-500/10 hover:bg-blue-500/20"
-                                                                    : "text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10"
+                                                                className={`h-8 w-8 rounded-full transition-all ${investment.isPaid
+                                                                    ? "bg-blue-500 hover:bg-blue-600 text-white shadow-md shadow-blue-500/20 border-transparent"
+                                                                    : "text-muted-foreground hover:text-blue-500 hover:border-blue-500/50 hover:bg-blue-500/5"
                                                                     }`}
                                                                 onClick={() => handleTogglePaid(investment.id, investment.isPaid)}
                                                             >
-                                                                <CheckCircle2 className={`h-4 w-4 ${investment.isPaid ? "fill-current" : ""}`} />
+                                                                <CheckCircle2 className="h-4 w-4" />
                                                             </Button>
                                                             <EditInvestmentDialog investment={investment} />
                                                             <Button
