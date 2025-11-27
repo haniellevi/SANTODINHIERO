@@ -95,6 +95,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
                     totalMiscPaid={totalMiscPaid}
                     isTithePaid={currentMonth.isTithePaid}
                     monthId={currentMonth.id}
+                    isTitheEnabled={dbUser.isTitheEnabled}
                 />
             </div>
         </div>

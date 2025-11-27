@@ -54,6 +54,7 @@ interface ExpenseListProps {
     totalMiscPaid: number;
     isTithePaid: boolean;
     monthId: string;
+    isTitheEnabled?: boolean;
 }
 
 export function ExpenseList({
@@ -65,7 +66,8 @@ export function ExpenseList({
     totalInvestmentPaid,
     totalMisc,
     totalMiscPaid,
-    monthId
+    monthId,
+    isTitheEnabled = true
 }: ExpenseListProps) {
     const [expenses, setExpenses] = useState(initialExpenses);
     const [incomes, setIncomes] = useState(initialIncomes);
@@ -85,7 +87,7 @@ export function ExpenseList({
         .filter(m => (m.dayOfMonth || 32) <= currentDay)
         .reduce((sum, m) => sum + m.amount, 0);
 
-    const titheItems = incomes.map(income => ({
+    const titheItems = isTitheEnabled ? incomes.map(income => ({
         id: `tithe-${income.id}`,
         originalId: income.id,
         description: `Dízimo - ${income.description}`,
@@ -93,7 +95,7 @@ export function ExpenseList({
         dayOfMonth: income.dayOfMonth,
         isPaid: income.isTithePaid || false,
         displayType: 'tithe' as const
-    }));
+    })) : [];
 
     const totalTithe = titheItems.reduce((acc, curr) => acc + curr.amount, 0);
     const totalTithePaid = titheItems.filter(t => t.isPaid).reduce((acc, curr) => acc + curr.amount, 0);
