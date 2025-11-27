@@ -4,16 +4,14 @@ import { NextResponse } from 'next/server';
 
 
 export async function getUserFromClerkId(clerkId: string) {
-  let user = await db.user.findUnique({
-    where: { clerkId }
+  // Use upsert to handle race conditions where user might be created between find and create
+  const user = await db.user.upsert({
+    where: { clerkId },
+    update: {}, // No updates if exists
+    create: {
+      clerkId
+    }
   });
-
-  if (!user) {
-    // Create user if doesn't exist
-    user = await db.user.create({
-      data: { clerkId }
-    });
-  }
 
   return user;
 }
@@ -27,10 +25,10 @@ export function createAuthErrorResponse(message: string, status: number = 401) {
 
 export async function validateUserAuthentication() {
   const { userId } = await auth();
-  
+
   if (!userId) {
     throw new Error('Unauthorized');
   }
-  
+
   return userId;
 }
