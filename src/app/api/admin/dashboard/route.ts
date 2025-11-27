@@ -17,6 +17,54 @@ export async function GET() {
             where: { isActive: true },
         });
 
+        // BI Metrics - User Growth
+        const now = new Date();
+        const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const newUsersThisMonth = await prisma.user.count({
+            where: {
+                createdAt: {
+                    gte: firstDayOfMonth
+                }
+            }
+        });
+
+        // BI Metrics - Financial
+        const allIncomes = await prisma.income.aggregate({
+            _sum: { amount: true }
+        });
+        const totalTTV = Number(allIncomes._sum.amount || 0);
+
+        const allMonths = await prisma.month.aggregate({
+            _sum: { tithePaidAmount: true }
+        });
+        const totalTitheVolume = Number(allMonths._sum.tithePaidAmount || 0);
+
+        // BI Metrics - Expense Distribution
+        const expenseDistribution = await prisma.expense.groupBy({
+            by: ['type'],
+            _sum: {
+                totalAmount: true
+            }
+        });
+        const distribution = expenseDistribution.map(d => ({
+            name: d.type,
+            value: Number(d._sum.totalAmount || 0)
+        }));
+
+        // BI Metrics - Recent Feedbacks
+        const recentFeedbacks = await prisma.feedback.findMany({
+            take: 5,
+            orderBy: { createdAt: 'desc' },
+            include: {
+                user: {
+                    select: {
+                        name: true,
+                        email: true
+                    }
+                }
+            }
+        });
+
         // Mock data for revenue charts (replace with real data when available)
         const mrrSeries = [
             { label: "Jan", value: 1200 },
@@ -48,6 +96,11 @@ export async function GET() {
         const stats = {
             totalUsers,
             activeUsers,
+            newUsersThisMonth,
+            totalTTV,
+            totalTitheVolume,
+            expenseDistribution: distribution,
+            recentFeedbacks,
             totalCredits: 0, // Placeholder
             usedCredits: 0, // Placeholder
             mrrSeries,
