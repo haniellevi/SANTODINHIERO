@@ -8,7 +8,11 @@ export async function getUserSettings() {
     const dbUser = await db.user.findUnique({
         where: { clerkId: user.id },
         include: {
-            collaborators: true,
+            collaborators: {
+                include: {
+                    user: true
+                }
+            },
             // We might want to include plan details here if we had a relation, 
             // but for now we'll just return the user and collaborators.
         }

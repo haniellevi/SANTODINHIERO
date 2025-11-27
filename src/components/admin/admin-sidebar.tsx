@@ -9,7 +9,8 @@ import {
     Database,
     CreditCard,
     UserPlus,
-    FileText
+    FileText,
+    MessageSquare
 } from "lucide-react"
 import {
     Sidebar,
@@ -54,6 +55,11 @@ const menuItems = [
         title: "Uso",
         url: "/admin/usage",
         icon: FileText,
+    },
+    {
+        title: "Suporte",
+        url: "/admin/support",
+        icon: MessageSquare,
     },
 ]
 

@@ -1,7 +1,9 @@
+"use server";
+
 import { db as prisma } from "@/lib/db";
 import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { FeedbackType, Permission } from "../../prisma/generated/client";
+import type { FeedbackType, Permission } from "../../prisma/generated/client";
 
 export async function updateUserSettings(data: { isTitheEnabled?: boolean; planningAlertDays?: number }) {
     const user = await currentUser();
@@ -19,6 +21,7 @@ export async function updateUserSettings(data: { isTitheEnabled?: boolean; plann
 
     revalidatePath("/dashboard");
     revalidatePath("/dashboard/settings");
+    revalidatePath("/dashboard/expenses");
 }
 
 export async function inviteCollaborator(email: string, permission: Permission) {

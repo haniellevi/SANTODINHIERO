@@ -14,7 +14,7 @@ export default async function SettingsPage() {
         redirect("/sign-in");
     }
 
-    const maxCollaborators = userPlan?.maxCollaborators || 0;
+    const maxCollaborators = userPlan?.maxCollaborators || 3;
 
     return (
         <div className="container max-w-4xl py-8 space-y-8">

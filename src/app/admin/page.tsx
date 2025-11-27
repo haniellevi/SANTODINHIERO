@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { MrrBarChart, ArrBarChart, ChurnLineChart } from "@/components/charts/revenue-charts";
 import { useDashboard } from "@/hooks/use-dashboard";
+import dynamic from "next/dynamic";
 
 export default function AdminDashboard() {
   const { data: stats, isLoading, error } = useDashboard();
@@ -222,40 +223,10 @@ export default function AdminDashboard() {
   );
 }
 
-// Expense Distribution Pie Chart Component
-function ExpenseDistributionPieChart({ data }: { data: { name: string; value: number }[] }) {
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
-
-  // Dynamically import recharts to avoid SSR issues
-  const PieChart = require('recharts').PieChart;
-  const Pie = require('recharts').Pie;
-  const Cell = require('recharts').Cell;
-  const ResponsiveContainer = require('recharts').ResponsiveContainer;
-  const Tooltip = require('recharts').Tooltip;
-  const Legend = require('recharts').Legend;
-
-  return (
-    <ResponsiveContainer width="100%" height="100%">
-      <PieChart>
-        <Pie
-          data={data}
-          cx="50%"
-          cy="50%"
-          labelLine={false}
-          outerRadius={80}
-          fill="#8884d8"
-          dataKey="value"
-        >
-          {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-          ))}
-        </Pie>
-        <Tooltip formatter={(value: number) => `R$ ${value.toFixed(2)}`} />
-        <Legend />
-      </PieChart>
-    </ResponsiveContainer>
-  );
-}
+const ExpenseDistributionPieChart = dynamic(
+  () => import('@/components/admin/expense-distribution-chart').then(mod => mod.ExpenseDistributionPieChart),
+  { ssr: false }
+);
 
 function DeltaBadge({ series, goodWhenPositive = true, suffix = "" }: { series: { label: string; value: number }[]; goodWhenPositive?: boolean; suffix?: string }) {
   if (!series || series.length < 2) return null
