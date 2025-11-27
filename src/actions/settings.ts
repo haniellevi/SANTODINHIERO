@@ -54,7 +54,7 @@ export async function inviteCollaborator(email: string, permission: Permission) 
     if (existingInvite) throw new Error("Este e-mail já foi convidado.");
 
     // Create Invite
-    await prisma.collaborator.create({
+    const newCollaborator = await prisma.collaborator.create({
         data: {
             ownerId: dbUser.id,
             email,
@@ -63,7 +63,24 @@ export async function inviteCollaborator(email: string, permission: Permission) 
         }
     });
 
-    // TODO: Send Email (Resend)
+    // Send Email
+    try {
+        const { sendCollaboratorInvite } = await import('@/lib/email');
+
+        // Generate invite link (você pode personalizar isso)
+        const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?tab=collaborators&invite=${newCollaborator.id}`;
+
+        await sendCollaboratorInvite({
+            to: email,
+            ownerName: dbUser.name || user.firstName || 'Um usuário',
+            inviteLink,
+            permission
+        });
+    } catch (emailError) {
+        console.error('Failed to send invite email:', emailError);
+        // Não falha a operação se o email não for enviado
+        // O convite ainda é criado no banco
+    }
 
     revalidatePath("/dashboard/settings");
 }
