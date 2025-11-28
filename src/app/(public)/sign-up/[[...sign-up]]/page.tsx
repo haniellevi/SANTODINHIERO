@@ -31,6 +31,7 @@ export default function SignUpPage() {
                 routing="path"
                 path="/sign-up"
                 signInUrl="/sign-in"
+                fallbackRedirectUrl="/dashboard"
               />
             </CardContent>
           </Card>
@@ -61,6 +62,7 @@ export default function SignUpPage() {
             routing="path"
             path="/sign-up"
             signInUrl="/sign-in"
+            fallbackRedirectUrl="/dashboard"
           />
         </div>
       </div>
