@@ -194,7 +194,7 @@ async function handleUserCreated(event: WebhookEvent) {
     const resolvedName = resolveName(payload)
 
     if (existing) {
-      const updates: Prisma.UserUpdateInput = {}
+      const updates: any = {}
       let hasChanges = false
 
       if (fieldProvided(payload, 'email')) {
@@ -241,7 +241,7 @@ async function handleUserUpdated(event: WebhookEvent) {
   const payload = event.data
   const clerkUserId = payload.id
 
-  const updates: Prisma.UserUpdateInput = {}
+  const updates: any = {}
   let hasChanges = false
 
   if (fieldProvided(payload, 'email')) {
@@ -313,7 +313,7 @@ async function handleUserDeleted(event: WebhookEvent) {
     })
 
     await tx.storageObject.deleteMany({
-      where: { userId: existing.id },
+      where: { clerkUserId },
     })
 
     await tx.creditBalance.deleteMany({

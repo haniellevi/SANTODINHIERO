@@ -15,34 +15,11 @@ export async function GET() {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        // Fetch plans from Clerk
-        // Note: Clerk's API for plans may vary depending on your setup
-        // This is a basic implementation that may need adjustment
-        const plans = await clerkClient.subscriptionPlans.list();
-
-        const normalizedPlans = plans.data.map((plan: any) => ({
-            id: plan.id,
-            name: plan.name || plan.slug,
-            slug: plan.slug,
-            prices: plan.prices?.map((price: any) => ({
-                id: price.id,
-                unit_amount: price.unit_amount,
-                currency: price.currency,
-                recurring: price.recurring ? {
-                    interval: price.recurring.interval,
-                    interval_count: price.recurring.interval_count,
-                } : null,
-            })) || [],
-        }));
-
-        return NextResponse.json({ plans: normalizedPlans });
+        // Note: subscriptionPlans API is not available in current Clerk SDK
+        // Returning empty array - implement custom plan management instead
+        return NextResponse.json({ plans: [] });
     } catch (error) {
         console.error("[ADMIN_CLERK_PLANS_GET]", error);
-
-        // If Clerk doesn't have subscription plans configured, return empty array
-        if (error instanceof Error && error.message.includes("not found")) {
-            return NextResponse.json({ plans: [] });
-        }
 
         return new NextResponse(
             error instanceof Error ? error.message : "Internal Error",

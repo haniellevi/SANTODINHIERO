@@ -16,15 +16,9 @@ export async function POST() {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        // Fetch plans from Clerk
-        let clerkPlans: any[] = [];
-        try {
-            const plansResponse = await clerkClient.subscriptionPlans.list();
-            clerkPlans = plansResponse.data || [];
-        } catch (error) {
-            console.warn("[ADMIN_REFRESH_PRICING] Clerk plans not available:", error);
-            // Continue even if Clerk doesn't have plans configured
-        }
+        // Note: subscriptionPlans API is not available in current Clerk SDK
+        // Skipping Clerk plan fetch - plans should be managed in database
+        const clerkPlans: any[] = [];
 
         let updated = 0;
         let missingInDb = 0;

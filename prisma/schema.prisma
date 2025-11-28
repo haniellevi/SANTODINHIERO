@@ -23,7 +23,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Configura√ß√µes
+  // Configura????es
   isTitheEnabled      Boolean @default(true)
   planningAlertDays   Int     @default(5)
   role                UserRole @default(USER)
@@ -33,6 +33,9 @@ model User {
   collaborators      Collaborator[] @relation("OwnerCollaborators")
   collaborations     Collaborator[] @relation("MemberCollaborations")
   feedbacks          Feedback[]
+    creditBalance      CreditBalance?
+    subscriptionEvents SubscriptionEvent[]
+    usageHistory       UsageHistory[]
 
   @@index([email])
   @@index([name])
@@ -191,7 +194,7 @@ model Collaborator {
   owner       User     @relation("OwnerCollaborators", fields: [ownerId], references: [id])
   
   email       String   // Email do convidado
-  userId      String?  // ID do usu·rio convidado (se j· tiver conta)
+  userId      String?  // ID do usu?rio convidado (se j? tiver conta)
   user        User?    @relation("MemberCollaborations", fields: [userId], references: [id])
   
   status      InviteStatus @default(PENDING)
@@ -246,3 +249,44 @@ enum FeedbackStatus {
   CLOSED
 }
 
+
+model CreditBalance {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clerkUserId      String   @unique
+  creditsRemaining Int      @default(0)
+  lastSyncedAt     DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model SubscriptionEvent {
+  id               String   @id @default(cuid())
+  clerkUserId      String
+  userId           String?
+  user             User?    @relation(fields: [userId], references: [id])
+  type             String
+  status           String
+  planId           String?
+  currentPeriodEnd DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([clerkUserId])
+}
+
+model UsageHistory {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clerkUserId String
+  operation   String
+  creditsUsed Int
+  details     Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([clerkUserId])
+}

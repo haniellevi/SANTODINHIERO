@@ -1,11 +1,17 @@
 import { clerkClient } from "@clerk/nextjs/server";
 import { getPlanCredits } from "@/lib/credits/settings";
 
+export interface PlanFeature {
+  name: string;
+  description?: string;
+  included?: boolean;
+}
+
 export interface SubscriptionPlan {
   id: string;
   name: string;
   credits: number;
-  features: string[];
+  features: PlanFeature[];
   priceMonthly?: number;
 }
 
@@ -16,9 +22,9 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     name: "Gratuito",
     credits: 100,
     features: [
-      "100 créditos por mês",
-      "Recursos essenciais de IA",
-      "Suporte da comunidade",
+      { name: "100 créditos por mês", included: true },
+      { name: "Recursos essenciais de IA", included: true },
+      { name: "Suporte da comunidade", included: true },
     ],
   },
   starter: {
@@ -26,10 +32,10 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     name: "Iniciante",
     credits: 500,
     features: [
-      "500 créditos por mês",
-      "Todos os recursos de IA",
-      "Suporte por email",
-      "Funcionalidade de exportação",
+      { name: "500 créditos por mês", included: true },
+      { name: "Todos os recursos de IA", included: true },
+      { name: "Suporte por email", included: true },
+      { name: "Funcionalidade de exportação", included: true },
     ],
     priceMonthly: 9,
   },
@@ -38,10 +44,10 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     name: "Profissional",
     credits: 2000,
     features: [
-      "2000 créditos por mês",
-      "Processamento prioritário de IA",
-      "Suporte prioritário",
-      "Análises avançadas",
+      { name: "2000 créditos por mês", included: true },
+      { name: "Processamento prioritário de IA", included: true },
+      { name: "Suporte prioritário", included: true },
+      { name: "Análises avançadas", included: true },
     ],
     priceMonthly: 29,
   },
@@ -50,12 +56,12 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     name: "Empresarial",
     credits: 10000,
     features: [
-      "10000 créditos por mês",
-      "Tudo do Profissional",
-      "Modelos de IA personalizados",
-      "Suporte dedicado",
-      "Garantias de SLA",
-      "Integrações personalizadas",
+      { name: "10000 créditos por mês", included: true },
+      { name: "Tudo do Profissional", included: true },
+      { name: "Modelos de IA personalizados", included: true },
+      { name: "Suporte dedicado", included: true },
+      { name: "Garantias de SLA", included: true },
+      { name: "Integrações personalizadas", included: true },
     ],
     priceMonthly: 0, // Custom pricing
   },

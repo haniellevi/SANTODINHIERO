@@ -1,0 +1,52 @@
+[
+  {
+    "id": "TC001",
+    "title": "get_public_plans_should_return_list_of_public_plans",
+    "description": "Verify that the GET /api/public/plans endpoint returns a list of all public subscription plans available for users with a 200 status code."
+  },
+  {
+    "id": "TC002",
+    "title": "get_admin_dashboard_should_return_statistics_for_authorized_users",
+    "description": "Verify that the GET /api/admin/dashboard endpoint returns dashboard statistics including user counts, financial metrics, and recent feedbacks only for authenticated users with ADMIN role, and returns 401 for unauthorized access."
+  },
+  {
+    "id": "TC003",
+    "title": "admin_plans_crud_operations_should_work_correctly",
+    "description": "Verify that the /api/admin/plans endpoints support creating, retrieving, updating, and deleting subscription plans with proper authentication and return appropriate status codes."
+  },
+  {
+    "id": "TC004",
+    "title": "refresh_plan_pricing_should_update_pricing_from_clerk",
+    "description": "Verify that the POST /api/admin/plans/refresh-pricing endpoint refreshes the subscription plan pricing data from Clerk and returns success status for authenticated admin users."
+  },
+  {
+    "id": "TC005",
+    "title": "admin_users_management_should_handle_user_operations",
+    "description": "Verify that the /api/admin/users endpoints support listing users, getting user details, updating user information, activating users, inviting new users, and syncing users with Clerk with proper authentication and correct responses."
+  },
+  {
+    "id": "TC006",
+    "title": "admin_settings_should_get_and_update_settings",
+    "description": "Verify that the GET and PUT /api/admin/settings endpoints allow authenticated admin users to retrieve and update application settings correctly."
+  },
+  {
+    "id": "TC007",
+    "title": "admin_usage_should_return_usage_statistics",
+    "description": "Verify that the GET /api/admin/usage endpoint returns usage statistics and analytics data only for authenticated admin users."
+  },
+  {
+    "id": "TC008",
+    "title": "admin_storage_should_return_storage_items",
+    "description": "Verify that the GET /api/admin/storage endpoint returns storage management data for uploaded files only for authenticated admin users."
+  },
+  {
+    "id": "TC009",
+    "title": "clerk_plans_should_return_subscription_plans",
+    "description": "Verify that the GET /api/admin/clerk/plans endpoint returns subscription plans fetched from Clerk for authenticated admin users."
+  },
+  {
+    "id": "TC010",
+    "title": "clerk_webhook_should_handle_authentication_events",
+    "description": "Verify that the POST /api/webhooks/clerk endpoint correctly handles Clerk webhook events for user creation, update, and deletion with valid payloads."
+  }
+]

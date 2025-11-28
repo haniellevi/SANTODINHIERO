@@ -1,0 +1,298 @@
+{
+  "tech_stack": [
+    "TypeScript",
+    "Next.js 15.5.4",
+    "React 19",
+    "Prisma 6.16.3",
+    "PostgreSQL",
+    "Clerk Authentication",
+    "TailwindCSS 4",
+    "Radix UI",
+    "React Query",
+    "Zod"
+  ],
+  "features": [
+    {
+      "name": "Public Plans API",
+      "description": "Get all public subscription plans available for users",
+      "files": ["src/app/api/public/plans/route.ts"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/api/public/plans": {
+            "get": {
+              "summary": "Get public plans",
+              "responses": {
+                "200": {
+                  "description": "List of public plans"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Admin Dashboard API",
+      "description": "Get dashboard statistics for admin panel including user counts, financial metrics, and recent feedbacks",
+      "files": ["src/app/api/admin/dashboard/route.ts"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/api/admin/dashboard": {
+            "get": {
+              "summary": "Get admin dashboard stats",
+              "security": [{"clerkAuth": []}],
+              "responses": {
+                "200": {
+                  "description": "Dashboard statistics"
+                },
+                "401": {
+                  "description": "Unauthorized"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Admin Plans API",
+      "description": "CRUD operations for subscription plans management",
+      "files": [
+        "src/app/api/admin/plans/route.ts",
+        "src/app/api/admin/plans/[id]/route.ts",
+        "src/app/api/admin/plans/refresh-pricing/route.ts"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/api/admin/plans": {
+            "get": {
+              "summary": "Get all plans",
+              "security": [{"clerkAuth": []}]
+            },
+            "post": {
+              "summary": "Create new plan",
+              "security": [{"clerkAuth": []}]
+            }
+          },
+          "/api/admin/plans/{id}": {
+            "put": {
+              "summary": "Update plan",
+              "security": [{"clerkAuth": []}]
+            },
+            "delete": {
+              "summary": "Delete plan",
+              "security": [{"clerkAuth": []}]
+            }
+          },
+          "/api/admin/plans/refresh-pricing": {
+            "post": {
+              "summary": "Refresh plan pricing from Clerk",
+              "security": [{"clerkAuth": []}]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Admin Users API",
+      "description": "User management including listing, activation, invitations, and sync with Clerk",
+      "files": [
+        "src/app/api/admin/users/route.ts",
+        "src/app/api/admin/users/[id]/route.ts",
+        "src/app/api/admin/users/[id]/activate/route.ts",
+        "src/app/api/admin/users/invite/route.ts",
+        "src/app/api/admin/users/sync/route.ts",
+        "src/app/api/admin/users/invitations/route.ts",
+        "src/app/api/admin/users/invitations/[id]/resend/route.ts",
+        "src/app/api/admin/users/invitations/[id]/revoke/route.ts"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/api/admin/users": {
+            "get": {
+              "summary": "List all users",
+              "security": [{"clerkAuth": []}]
+            }
+          },
+          "/api/admin/users/{id}": {
+            "get": {
+              "summary": "Get user details",
+              "security": [{"clerkAuth": []}]
+            },
+            "patch": {
+              "summary": "Update user",
+              "security": [{"clerkAuth": []}]
+            }
+          },
+          "/api/admin/users/{id}/activate": {
+            "post": {
+              "summary": "Activate user",
+              "security": [{"clerkAuth": []}]
+            }
+          },
+          "/api/admin/users/invite": {
+            "post": {
+              "summary": "Invite new user",
+              "security": [{"clerkAuth": []}]
+            }
+          },
+          "/api/admin/users/sync": {
+            "post": {
+              "summary": "Sync users with Clerk",
+              "security": [{"clerkAuth": []}]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Admin Settings API",
+      "description": "Application settings management",
+      "files": ["src/app/api/admin/settings/route.ts"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/api/admin/settings": {
+            "get": {
+              "summary": "Get settings",
+              "security": [{"clerkAuth": []}]
+            },
+            "put": {
+              "summary": "Update settings",
+              "security": [{"clerkAuth": []}]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Admin Usage API",
+      "description": "Get usage statistics and analytics",
+      "files": ["src/app/api/admin/usage/route.ts"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/api/admin/usage": {
+            "get": {
+              "summary": "Get usage statistics",
+              "security": [{"clerkAuth": []}]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Admin Storage API",
+      "description": "Storage management for uploaded files",
+      "files": ["src/app/api/admin/storage/route.ts"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/api/admin/storage": {
+            "get": {
+              "summary": "Get storage items",
+              "security": [{"clerkAuth": []}]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Clerk Plans API",
+      "description": "Fetch subscription plans from Clerk",
+      "files": ["src/app/api/admin/clerk/plans/route.ts"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/api/admin/clerk/plans": {
+            "get": {
+              "summary": "Get Clerk subscription plans",
+              "security": [{"clerkAuth": []}]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Clerk Webhook",
+      "description": "Handle Clerk authentication webhooks for user creation, update, and deletion",
+      "files": ["src/app/api/webhooks/clerk/route.ts"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/api/webhooks/clerk": {
+            "post": {
+              "summary": "Handle Clerk webhook events",
+              "requestBody": {
+                "description": "Clerk webhook payload"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Users Webhook",
+      "description": "Handle user-related webhook events for financial data management",
+      "files": ["src/app/api/webhooks/users/route.ts"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/api/webhooks/users": {
+            "post": {
+              "summary": "Handle user webhook events"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Dashboard Page",
+      "description": "Main financial dashboard showing income, expenses, investments, and predictions",
+      "files": [
+        "src/app/(protected)/dashboard/page.tsx",
+        "src/components/dashboard/transaction-summary-card.tsx",
+        "src/components/dashboard/monthly-prediction.tsx",
+        "src/components/dashboard/income-list.tsx",
+        "src/components/dashboard/expense-list.tsx",
+        "src/components/dashboard/investment-list.tsx",
+        "src/components/dashboard/misc-expense-list.tsx"
+      ]
+    },
+    {
+      "name": "Admin Panel",
+      "description": "Administration panel for managing users, plans, settings, and viewing analytics",
+      "files": [
+        "src/app/admin/page.tsx",
+        "src/app/admin/users/page.tsx",
+        "src/app/admin/settings/page.tsx",
+        "src/app/admin/credits/page.tsx",
+        "src/app/admin/usage/page.tsx",
+        "src/app/admin/storage/page.tsx"
+      ]
+    },
+    {
+      "name": "Authentication",
+      "description": "User authentication with Clerk including sign-in, sign-up, and session management",
+      "files": [
+        "src/app/(public)/sign-in/[[...sign-in]]/page.tsx",
+        "src/app/(public)/sign-up/[[...sign-up]]/page.tsx",
+        "src/middleware.ts",
+        "src/lib/auth-utils.ts"
+      ]
+    },
+    {
+      "name": "Financial Calculations",
+      "description": "Core financial utilities for calculating totals, balances, and tithe amounts",
+      "files": [
+        "src/lib/finance-utils.ts",
+        "src/lib/queries/finance.ts"
+      ]
+    }
+  ]
+}
+
