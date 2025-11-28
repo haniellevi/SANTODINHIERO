@@ -6,9 +6,13 @@ import {
   TrendingUp,
   Activity
 } from "lucide-react";
-import { MrrBarChart, ArrBarChart, ChurnLineChart } from "@/components/charts/revenue-charts";
 import { useDashboard } from "@/hooks/use-dashboard";
 import dynamic from "next/dynamic";
+
+const AdminCharts = dynamic(() => import('@/components/admin/charts'), {
+  ssr: false,
+  loading: () => <div className="h-64 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>,
+});
 
 export default function AdminDashboard() {
   const { data: stats, isLoading, error } = useDashboard();
@@ -147,7 +151,7 @@ export default function AdminDashboard() {
             </div>
             {stats?.mrrSeries && <DeltaBadge series={stats.mrrSeries} goodWhenPositive />}
           </div>
-          {stats?.mrrSeries && <MrrBarChart data={stats.mrrSeries} />}
+          {stats?.mrrSeries && <AdminCharts.MrrBarChart data={stats.mrrSeries} />}
         </Card>
 
         <Card className="p-6">
@@ -158,7 +162,7 @@ export default function AdminDashboard() {
             </div>
             {stats?.arrSeries && <DeltaBadge series={stats.arrSeries} goodWhenPositive />}
           </div>
-          {stats?.arrSeries && <ArrBarChart data={stats.arrSeries} />}
+          {stats?.arrSeries && <AdminCharts.ArrBarChart data={stats.arrSeries} />}
         </Card>
 
         <Card className="p-6">
@@ -169,7 +173,7 @@ export default function AdminDashboard() {
             </div>
             {stats?.churnSeries && <DeltaBadge series={stats.churnSeries} goodWhenPositive={false} suffix="%" />}
           </div>
-          {stats?.churnSeries && <ChurnLineChart data={stats.churnSeries} />}
+          {stats?.churnSeries && <AdminCharts.ChurnLineChart data={stats.churnSeries} />}
         </Card>
       </div>
 
@@ -184,7 +188,7 @@ export default function AdminDashboard() {
             </div>
             {stats?.expenseDistribution && stats.expenseDistribution.length > 0 ? (
               <div className="h-[300px]">
-                <ExpenseDistributionPieChart data={stats.expenseDistribution} />
+                <AdminCharts.ExpenseDistributionPieChart data={stats.expenseDistribution} />
               </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-8">Nenhuma despesa registrada</p>
@@ -222,11 +226,6 @@ export default function AdminDashboard() {
     </div>
   );
 }
-
-const ExpenseDistributionPieChart = dynamic(
-  () => import('@/components/admin/expense-distribution-chart').then(mod => mod.ExpenseDistributionPieChart),
-  { ssr: false }
-);
 
 function DeltaBadge({ series, goodWhenPositive = true, suffix = "" }: { series: { label: string; value: number }[]; goodWhenPositive?: boolean; suffix?: string }) {
   if (!series || series.length < 2) return null

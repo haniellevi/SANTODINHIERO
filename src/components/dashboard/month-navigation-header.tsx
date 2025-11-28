@@ -7,11 +7,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 interface MonthNavigationHeaderProps {
     currentDate: Date;
+    hasPrevMonth: boolean;
+    hasNextMonth: boolean;
     availableMonths: { month: number; year: number }[];
 }
 
 export function MonthNavigationHeader({
     currentDate,
+    hasPrevMonth,
+    hasNextMonth,
     availableMonths,
 }: MonthNavigationHeaderProps) {
     const router = useRouter();
@@ -19,19 +23,6 @@ export function MonthNavigationHeader({
 
     const currentMonth = currentDate.getMonth() + 1;
     const currentYear = currentDate.getFullYear();
-
-    // Check if previous/next month exists
-    const hasPrevMonth = availableMonths.some(m => {
-        const mDate = new Date(m.year, m.month - 1);
-        const cDate = new Date(currentYear, currentMonth - 1);
-        return mDate < cDate;
-    });
-
-    const hasNextMonth = availableMonths.some(m => {
-        const mDate = new Date(m.year, m.month - 1);
-        const cDate = new Date(currentYear, currentMonth - 1);
-        return mDate > cDate;
-    });
 
     const handleNavigation = (direction: "prev" | "next") => {
         // Find the next available month in the direction

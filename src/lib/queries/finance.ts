@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { Month, Income, Expense, Investment, MiscExpense } from "../../../prisma/generated/client";
+import { cache } from "react";
 
 export type MonthWithDetails = Month & {
     incomes: Income[];
@@ -8,27 +9,38 @@ export type MonthWithDetails = Month & {
     miscExpenses: MiscExpense[];
 };
 
-export async function getMonthByDate(userId: string, month: number, year: number) {
-    return await prisma.month.findUnique({
-        where: {
-            userId_month_year: {
-                userId,
-                month,
-                year,
-            },
-        },
-        include: {
-            incomes: { orderBy: { order: "asc" } },
-            expenses: { orderBy: { order: "asc" } },
-            investments: { orderBy: { order: "asc" } },
-            miscExpenses: { orderBy: { order: "asc" } },
-        },
-    });
-}
+export const getMonthByDate = cache(
+    async (
+        userId: string,
+        month: number,
+        year: number,
+        options: { includeDetails?: boolean } = {}
+    ) => {
+        const { includeDetails = true } = options;
 
-export async function getCurrentMonth(userId: string) {
+        return await prisma.month.findUnique({
+            where: {
+                userId_month_year: {
+                    userId,
+                    month,
+                    year,
+                },
+            },
+            include: includeDetails
+                ? {
+                      incomes: { orderBy: { order: "asc" } },
+                      expenses: { orderBy: { order: "asc" } },
+                      investments: { orderBy: { order: "asc" } },
+                      miscExpenses: { orderBy: { order: "asc" } },
+                  }
+                : undefined,
+        });
+    }
+);
+
+export async function getCurrentMonth(userId: string, options?: { includeDetails?: boolean }) {
     const now = new Date();
-    return getMonthByDate(userId, now.getMonth() + 1, now.getFullYear());
+    return getMonthByDate(userId, now.getMonth() + 1, now.getFullYear(), options);
 }
 
 export async function createMonth(userId: string, month: number, year: number) {
@@ -52,8 +64,13 @@ export async function getOrCreateCurrentMonth(userId: string) {
     return getOrCreateMonth(userId, now.getMonth() + 1, now.getFullYear());
 }
 
-export async function getOrCreateMonth(userId: string, month: number, year: number) {
-    const existing = await getMonthByDate(userId, month, year);
+export async function getOrCreateMonth(
+    userId: string,
+    month: number,
+    year: number,
+    options?: { includeDetails?: boolean }
+) {
+    const existing = await getMonthByDate(userId, month, year, options);
     if (existing) return existing;
 
     return await createMonth(userId, month, year);
