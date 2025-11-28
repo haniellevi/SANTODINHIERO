@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getMonthByDate, getUserMonths } from "@/lib/queries/finance";
 import { calculateTotals } from "@/lib/finance-utils";
 import { getUserFromClerkId } from "@/lib/auth-utils";
-import { MonthNavigationHeader } from "@/components/dashboard/month-navigation-header";
+import { MonthNavigation } from "@/components/dashboard/month-navigation";
 import { IncomeCard } from "@/components/dashboard/income-card";
 import { ExpenseCard } from "@/components/dashboard/expense-card";
 import { MonthPlanningAlert } from "@/components/dashboard/month-planning-alert";
@@ -141,7 +141,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   return (
     <div className="flex min-h-screen flex-col gap-6 pb-32 pt-4 px-4 md:px-8 max-w-5xl mx-auto w-full">
-      <MonthNavigationHeader currentDate={currentDate} availableMonths={availableMonths} />
+      <MonthNavigation userId={dbUser.id} currentMonth={month} currentYear={year} />
 
       <div className="flex flex-col items-center justify-center py-8">
         <h1 className={`text-5xl font-bold tracking-tighter ${totals.balance > 0 ? "text-emerald-500" : totals.balance < 0 ? "text-red-500" : "text-foreground"}`}>
