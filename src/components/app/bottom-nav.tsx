@@ -2,10 +2,17 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { ArrowUpCircle, ArrowDownCircle, TrendingUp, Receipt } from "lucide-react";
+import { ArrowUpCircle, ArrowDownCircle, TrendingUp, Receipt, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
+    {
+        label: "Início",
+        href: "/dashboard",
+        icon: Home,
+        activeColor: "text-primary",
+        inactiveColor: "text-primary/70",
+    },
     {
         label: "Entradas",
         href: "/dashboard/incomes",
@@ -40,7 +47,7 @@ export function BottomNav() {
     const pathname = usePathname();
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface-dark/80 backdrop-blur-xl border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface-dark border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
             <div className="flex items-center justify-around h-24 px-2 pb-4">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href;

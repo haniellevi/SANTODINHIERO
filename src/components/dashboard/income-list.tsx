@@ -217,32 +217,32 @@ export function IncomeList({ incomes: initialIncomes }: IncomeListProps) {
                                                 style={provided.draggableProps.style}
                                             >
                                                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-transparent pointer-events-none" />
-                                                <CardContent className="p-4 space-y-3 relative">
-                                                    <div className="flex items-start justify-between">
-                                                        <div className="flex items-center gap-3">
-                                                            <span className="text-muted-foreground/50 text-xs font-medium w-6">{index + 1}</span>
-                                                            <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-1.5 hover:bg-white/5 rounded text-muted-foreground/40">
-                                                                <GripVertical className="h-4 w-4" />
+                                                <CardContent className="p-2 space-y-2 relative">
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <div className="flex items-center gap-2 overflow-hidden">
+                                                            <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-1 hover:bg-white/5 rounded text-muted-foreground/40 shrink-0">
+                                                                <GripVertical className="h-3.5 w-3.5" />
                                                             </div>
-                                                            <div>
-                                                                <p className="font-semibold text-foreground/90 line-clamp-1">{income.description}</p>
-                                                                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                                                                    <Calendar className="h-3 w-3" />
-                                                                    <span>Dia {income.dayOfMonth || "-"}</span>
+                                                            <div className="min-w-0">
+                                                                <p className="font-semibold text-foreground/90 truncate text-xs">{income.description}</p>
+                                                                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                                                                    <Calendar className="h-2.5 w-2.5" />
+                                                                    <span>{income.dayOfMonth || "-"}</span>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <p className="font-bold text-lg text-emerald-500">{formatCurrency(Number(income.amount))}</p>
+                                                        <p className="font-bold text-sm text-emerald-500 shrink-0">{formatCurrency(Number(income.amount))}</p>
                                                     </div>
 
-                                                    <div className="flex items-center justify-between pt-2 border-t border-border/50 gap-3">
+                                                    <div className="flex items-center justify-between gap-2">
                                                         <div className="flex-1">
                                                             <SlideButton
                                                                 isConfirmed={income.isReceived}
                                                                 onConfirm={async () => await handleToggleReceived(income.id, income.isReceived)}
-                                                                label="Arrastar para receber"
+                                                                label="Receber"
                                                                 confirmedLabel="Recebido"
                                                                 variant="income"
+                                                                className="h-8 min-w-[100px]"
                                                             />
                                                         </div>
                                                         <div className="flex items-center gap-1 shrink-0">

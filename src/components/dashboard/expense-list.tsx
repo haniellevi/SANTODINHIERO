@@ -369,39 +369,36 @@ export function ExpenseList({
                                                     className={cn("bg-card border-none shadow-sm", snapshot.isDragging && "opacity-50")}
                                                     style={provided.draggableProps.style}
                                                 >
-                                                    <CardContent className="p-2 space-y-1.5">
-                                                        <div className="flex items-start justify-between">
-                                                            <div className="flex items-center gap-2">
-                                                                <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-1 hover:bg-muted rounded text-muted-foreground/50">
+                                                    <CardContent className="p-2 space-y-2">
+                                                        <div className="flex items-center justify-between gap-2">
+                                                            <div className="flex items-center gap-2 overflow-hidden">
+                                                                <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-1 hover:bg-muted rounded text-muted-foreground/50 shrink-0">
                                                                     <GripVertical className="h-3.5 w-3.5" />
                                                                 </div>
-                                                                <div>
-                                                                    <p className="font-medium line-clamp-1 text-xs">{expense.description}</p>
-                                                                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
+                                                                <div className="min-w-0">
+                                                                    <p className="font-medium truncate text-xs">{expense.description}</p>
+                                                                    <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
                                                                         <Calendar className="h-2.5 w-2.5" />
-                                                                        <span>Dia {expense.dayOfMonth || "-"}</span>
+                                                                        <span>{expense.dayOfMonth || "-"}</span>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <p className="font-bold text-sm text-rose-500">{formatCurrency(total)}</p>
+                                                            <p className="font-bold text-sm text-rose-500 shrink-0">{formatCurrency(total)}</p>
                                                         </div>
 
                                                         <div className="space-y-1">
-                                                            <div className="flex justify-between text-[10px] text-muted-foreground uppercase tracking-wider">
-                                                                <span>Progresso</span>
-                                                                <span>{Math.round(percentage)}%</span>
-                                                            </div>
-                                                            <Progress value={percentage} className="h-1.5" indicatorClassName="bg-rose-500" />
+                                                            <Progress value={percentage} className="h-1" indicatorClassName="bg-rose-500" />
                                                         </div>
 
-                                                        <div className="flex items-center justify-between pt-2 border-t border-border/50 gap-3">
+                                                        <div className="flex items-center gap-2">
                                                             <div className="flex-1">
                                                                 <SlideButton
                                                                     isConfirmed={Number(expense.paidAmount) >= Number(expense.totalAmount)}
                                                                     onConfirm={async () => await handleTogglePaid(expense.id, !(Number(expense.paidAmount) >= Number(expense.totalAmount)))}
-                                                                    label="Arrastar para pagar"
+                                                                    label="Pagar"
                                                                     confirmedLabel="Pago"
                                                                     variant="expense"
+                                                                    className="h-8 min-w-[100px]"
                                                                 />
                                                             </div>
                                                             <div className="flex items-center gap-1 shrink-0">
