@@ -23,20 +23,18 @@ export function MonthNavigationHeader({
     const router = useRouter();
     const searchParams = useSearchParams();
 
+    // Helper to compare months numerically (year * 12 + month)
+    const getMonthValue = (m: { month: number; year: number }) => m.year * 12 + m.month;
+    const currentMonthValue = currentYear * 12 + currentMonth;
+
     // Check if previous/next month exists
     const prevMonth = availableMonths
-        .filter(m => new Date(m.year, m.month - 1) < new Date(currentYear, currentMonth - 1))
-        .sort((a, b) => {
-            if (a.year !== b.year) return b.year - a.year;
-            return b.month - a.month;
-        })[0]; // Get the closest previous month (descending sort)
+        .filter(m => getMonthValue(m) < currentMonthValue)
+        .sort((a, b) => getMonthValue(b) - getMonthValue(a))[0]; // Descending
 
     const nextMonth = availableMonths
-        .filter(m => new Date(m.year, m.month - 1) > new Date(currentYear, currentMonth - 1))
-        .sort((a, b) => {
-            if (a.year !== b.year) return a.year - b.year;
-            return a.month - b.month;
-        })[0]; // Get the closest next month (ascending sort)
+        .filter(m => getMonthValue(m) > currentMonthValue)
+        .sort((a, b) => getMonthValue(a) - getMonthValue(b))[0]; // Ascending
 
     const handleNavigation = (direction: "prev" | "next") => {
         const targetMonth = direction === "prev" ? prevMonth : nextMonth;

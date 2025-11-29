@@ -14,7 +14,7 @@ import { CalendarDays, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { formatMonthYear } from "@/lib/date-utils";
+import { formatMonthYear, formatMonthYearFromNumbers } from "@/lib/date-utils";
 import { toast } from "sonner";
 import { deleteMonth } from "@/actions/finance";
 
@@ -131,7 +131,7 @@ export function MonthsManagementDialog({
                                         className="flex flex-col items-start flex-1"
                                     >
                                         <span className={`font-medium capitalize ${isCurrentView ? "text-primary" : "text-foreground"}`}>
-                                            {formatMonthYear(date)}
+                                            {formatMonthYearFromNumbers(m.month, m.year)}
                                         </span>
                                         {isCurrentView && (
                                             <span className="text-[10px] uppercase font-bold text-primary/70">
