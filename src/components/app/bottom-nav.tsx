@@ -47,8 +47,8 @@ export function BottomNav() {
     const pathname = usePathname();
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface-dark border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
-            <div className="flex items-center justify-around h-24 px-2 pb-4">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#0a0a0a] border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+            <div className="flex items-center justify-around h-16 px-2 pb-2">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href;
                     const Icon = item.icon;
@@ -58,8 +58,8 @@ export function BottomNav() {
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                "relative flex flex-col items-center justify-center gap-1.5 px-4 py-3 rounded-2xl transition-all duration-300",
-                                "min-w-[80px] group",
+                                "relative flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-2xl transition-all duration-300",
+                                "min-w-[70px] group",
                                 isActive
                                     ? "bg-gradient-to-b from-white/10 to-transparent border border-white/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2)]"
                                     : "hover:bg-white/5"
@@ -71,7 +71,7 @@ export function BottomNav() {
                             )} />
 
                             <Icon className={cn(
-                                "h-6 w-6 relative z-10 transition-transform duration-300 group-hover:scale-110",
+                                "h-5 w-5 relative z-10 transition-transform duration-300 group-hover:scale-110",
                                 isActive ? item.activeColor : item.inactiveColor,
                                 isActive && "drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]"
                             )} />
