@@ -25,28 +25,22 @@ export function MonthNavigationHeader({
     const currentYear = currentDate.getFullYear();
 
     // Check if previous/next month exists
-    const hasPrevMonth = availableMonths.some(m => {
-        const mDate = new Date(m.year, m.month - 1);
-        const cDate = new Date(currentYear, currentMonth - 1);
-        return mDate < cDate;
-    });
+    const prevMonth = availableMonths
+        .filter(m => new Date(m.year, m.month - 1) < new Date(currentYear, currentMonth - 1))
+        .sort((a, b) => {
+            if (a.year !== b.year) return b.year - a.year;
+            return b.month - a.month;
+        })[0]; // Get the closest previous month (descending sort)
 
-    const hasNextMonth = availableMonths.some(m => {
-        const mDate = new Date(m.year, m.month - 1);
-        const cDate = new Date(currentYear, currentMonth - 1);
-        return mDate > cDate;
-    });
+    const nextMonth = availableMonths
+        .filter(m => new Date(m.year, m.month - 1) > new Date(currentYear, currentMonth - 1))
+        .sort((a, b) => {
+            if (a.year !== b.year) return a.year - b.year;
+            return a.month - b.month;
+        })[0]; // Get the closest next month (ascending sort)
 
     const handleNavigation = (direction: "prev" | "next") => {
-        // Find the next available month in the direction
-        const currentIdx = availableMonths.findIndex(
-            m => m.month === currentMonth && m.year === currentYear
-        );
-
-        if (currentIdx === -1) return;
-
-        const targetIdx = direction === "prev" ? currentIdx - 1 : currentIdx + 1;
-        const targetMonth = availableMonths[targetIdx];
+        const targetMonth = direction === "prev" ? prevMonth : nextMonth;
 
         if (!targetMonth) return;
 
@@ -69,7 +63,7 @@ export function MonthNavigationHeader({
                     variant="ghost"
                     size="icon"
                     onClick={() => handleNavigation("prev")}
-                    disabled={!hasPrevMonth}
+                    disabled={!prevMonth}
                     className="size-10 rounded-full hover:bg-accent text-primary disabled:opacity-30"
                 >
                     <ChevronLeft className="h-5 w-5" />
@@ -97,7 +91,7 @@ export function MonthNavigationHeader({
                 variant="ghost"
                 size="icon"
                 onClick={() => handleNavigation("next")}
-                disabled={!hasNextMonth}
+                disabled={!nextMonth}
                 className="size-10 rounded-full hover:bg-accent text-primary disabled:opacity-30"
             >
                 <ChevronRight className="h-5 w-5" />

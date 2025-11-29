@@ -170,6 +170,19 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     }
   });
 
+  // Ensure current month is in availableMonths (for dialog and navigation consistency)
+  if (currentMonth) {
+    const isInList = availableMonths.some(m => m.month === month && m.year === year);
+    if (!isInList) {
+      availableMonths.push({ month, year });
+      // Re-sort availableMonths
+      availableMonths.sort((a, b) => {
+        if (a.year !== b.year) return a.year - b.year;
+        return a.month - b.month;
+      });
+    }
+  }
+
   const totals = calculateTotals(currentMonth);
 
   const currentDay = new Date().getDate();
