@@ -9,6 +9,7 @@ import {
 } from "@clerk/nextjs";
 import { ptBR } from "@clerk/localizations";
 import { siteMetadata } from "@/lib/brand-config";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,6 +40,7 @@ export default function RootLayout({
               <Toaster />
             </ThemeProvider>
           </QueryProvider>
+          <SpeedInsights />
         </body>
       </html>
     </ClerkProvider>
