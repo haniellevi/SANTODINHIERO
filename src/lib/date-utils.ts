@@ -15,12 +15,15 @@ export function formatMonthYear(date: Date): string {
     return capitalized.replace(" de ", " - ");
 }
 
+
+
 /**
  * Formata mês e ano a partir de números
  * @param month - Número do mês (1-12)
  * @param year - Ano (ex: 2025)
  */
 export function formatMonthYearFromNumbers(month: number, year: number): string {
-    const date = new Date(year, month - 1);
+    // Usamos o dia 15 para evitar problemas de fuso horário (ex: dia 1 voltando para dia 30/31 do mês anterior)
+    const date = new Date(year, month - 1, 15);
     return formatMonthYear(date);
 }
