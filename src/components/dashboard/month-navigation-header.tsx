@@ -48,7 +48,7 @@ export function MonthNavigationHeader({
         params.set("month", targetMonth.month.toString());
         params.set("year", targetMonth.year.toString());
 
-        router.push(`?${params.toString()}`);
+        router.push(`/dashboard?${params.toString()}`);
     };
 
     const formattedDate = new Intl.DateTimeFormat("pt-BR", {
