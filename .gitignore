@@ -27,6 +27,9 @@ yarn-error.log*
 # local env files
 .env*.local
 .env
+.env.check
+.env.check.prod
+.env.prod
 
 # vercel
 .vercel
@@ -49,3 +52,11 @@ prisma/generated/
 _backups/
 backups/
 __pycache__/
+
+# deploy logs
+build_log.txt
+deploy_log.txt
+deployments.txt
+
+# design files
+Novo-dasign/
