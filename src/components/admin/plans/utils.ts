@@ -2,26 +2,26 @@ import type { BillingPlan, PlanFeature, ClerkPlan } from './types';
 
 export function mapFeaturesFromApi(features: unknown): PlanFeature[] {
     if (!features) return [];
+    let featureArray: any[] = [];
+
     if (typeof features === 'string') {
         try {
             const parsed = JSON.parse(features);
             if (Array.isArray(parsed)) {
-                return parsed.map((f) => ({
-                    text: f.text || '',
-                    included: f.included !== false,
-                }));
+                featureArray = parsed;
             }
         } catch {
             return [];
         }
+    } else if (Array.isArray(features)) {
+        featureArray = features;
     }
-    if (Array.isArray(features)) {
-        return features.map((f) => ({
-            text: f.text || '',
-            included: f.included !== false,
-        }));
-    }
-    return [];
+
+    return featureArray.map((f) => ({
+        name: f.name || f.text || '', // compatible with old 'text' property
+        description: f.description || null,
+        included: f.included !== false,
+    }));
 }
 
 export function serializePlanForPersistence(plan: BillingPlan) {
@@ -35,7 +35,7 @@ export function serializePlanForPersistence(plan: BillingPlan) {
         priceMonthlyCents: plan.priceMonthlyCents ?? null,
         priceYearlyCents: plan.priceYearlyCents ?? null,
         description: plan.description || null,
-        features: plan.features && plan.features.length > 0 ? JSON.stringify(plan.features) : null,
+        features: plan.features && plan.features.length > 0 ? plan.features : null, // No longer stringified
         badge: plan.badge || null,
         highlight: plan.highlight ?? false,
         ctaType: plan.ctaType ?? 'checkout',

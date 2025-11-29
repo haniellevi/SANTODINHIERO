@@ -11,7 +11,8 @@ import { RecentTransactionsList, Transaction } from "@/components/dashboard/rece
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UpcomingActionsList } from "@/components/dashboard/upcoming-actions-list";
 import { ReceiptSummary } from "@/components/dashboard/receipt-summary";
-import { getNextMonth } from "@/lib/month-utils";
+import { getNextMonth, getMonthName } from "@/lib/month-utils";
+import { ExpenseType } from "@prisma/client";
 
 import { Metadata } from "next";
 import { prisma } from "@/lib/db";
@@ -48,7 +49,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   console.log('[Dashboard] Fetching user months...');
   const availableMonths = await getUserMonths(dbUser.id);
   console.log('[Dashboard] Available months:', availableMonths.length);
-
   // If no months exist at all, create ONLY the current month
   if (availableMonths.length === 0) {
     const currentMonthNow = now.getMonth() + 1;
@@ -71,10 +71,91 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const currentMonth = await getMonthByDate(dbUser.id, month, year);
   console.log('[Dashboard] Month found:', !!currentMonth);
 
-  // If month doesn't exist, redirect to the most recent month
+  // If month doesn't exist, check if it's the current real-time month
   if (!currentMonth) {
-    const latestMonth = availableMonths[availableMonths.length - 1];
-    redirect(`/dashboard?month=${latestMonth.month}&year=${latestMonth.year}`);
+    const isCurrentRealTimeMonth = month === now.getMonth() + 1 && year === now.getFullYear();
+
+    if (isCurrentRealTimeMonth) {
+      console.log('[Dashboard] Current month missing. Attempting auto-duplication...');
+
+      // Calculate previous month
+      const prevMonthDate = month === 1 ? { month: 12, year: year - 1 } : { month: month - 1, year: year };
+
+      // Check if previous month exists
+      const prevMonth = await prisma.month.findUnique({
+        where: {
+          userId_month_year: {
+            userId: dbUser.id,
+            month: prevMonthDate.month,
+            year: prevMonthDate.year,
+          },
+        },
+        include: {
+          incomes: true,
+          expenses: { where: { type: ExpenseType.STANDARD } },
+          investments: true,
+        },
+      });
+
+      if (prevMonth) {
+        console.log('[Dashboard] Previous month found. Duplicating...');
+        // Duplicate previous month
+        await prisma.month.create({
+          data: {
+            userId: dbUser.id,
+            month: month,
+            year: year,
+            incomes: {
+              create: prevMonth.incomes.map((income) => ({
+                description: income.description,
+                amount: income.amount,
+                dayOfMonth: income.dayOfMonth,
+                order: income.order,
+                isReceived: false, // Reset status
+                isTithePaid: false, // Reset status
+              })),
+            },
+            expenses: {
+              create: prevMonth.expenses.map((expense) => ({
+                description: expense.description,
+                totalAmount: expense.totalAmount,
+                paidAmount: 0, // Reset paid amount
+                dayOfMonth: expense.dayOfMonth,
+                type: expense.type,
+                order: expense.order,
+                isPaid: false, // Reset status
+              })),
+            },
+            investments: {
+              create: prevMonth.investments.map((investment) => ({
+                description: investment.description,
+                amount: investment.amount,
+                dayOfMonth: investment.dayOfMonth,
+                order: investment.order,
+                isPaid: false, // Reset status
+              })),
+            },
+          },
+        });
+      } else {
+        console.log('[Dashboard] Previous month not found. Creating empty month...');
+        // Create empty month
+        await prisma.month.create({
+          data: {
+            userId: dbUser.id,
+            month: month,
+            year: year,
+          },
+        });
+      }
+
+      // Redirect to self to load the new data
+      redirect(`/dashboard?month=${month}&year=${year}`);
+    } else {
+      // If it's not the current month, redirect to the most recent existing month
+      const latestMonth = availableMonths[availableMonths.length - 1];
+      redirect(`/dashboard?month=${latestMonth.month}&year=${latestMonth.year}`);
+    }
   }
 
   // Check if next month exists for planning alert logic
@@ -185,20 +266,18 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     ...currentMonth.expenses.map(e => ({ id: e.id, type: "expense" as const, description: e.description, amount: Number(e.totalAmount), date: e.updatedAt })),
     ...currentMonth.investments.map(i => ({ id: i.id, type: "investment" as const, description: i.description, amount: Number(i.amount), date: i.updatedAt })),
     ...currentMonth.miscExpenses.map(m => ({ id: m.id, type: "misc" as const, description: m.description, amount: Number(m.amount), date: m.updatedAt })),
-  ].sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
-    .slice(0, 10); // Show last 10
-
-  const currentDate = new Date(year, month - 1);
+  ].sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
 
   return (
-    <div className="flex min-h-screen flex-col gap-6 pb-32 pt-4 px-4 md:px-8 max-w-5xl mx-auto w-full">
-      <MonthNavigationHeader currentDate={currentDate} availableMonths={availableMonths} />
-
-      <div className="flex flex-col items-center justify-center py-8">
-        <h1 className={`text-5xl font-bold tracking-tighter ${totals.balance > 0 ? "text-emerald-500" : totals.balance < 0 ? "text-red-500" : "text-foreground"}`}>
-          {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totals.balance)}
-        </h1>
-        <p className="mt-2 text-sm font-medium text-muted-foreground uppercase tracking-widest">Saldo do Mês</p>
+    <div className="flex-1 space-y-4 p-4 pt-6 max-w-5xl mx-auto w-full">
+      <div className="flex items-center justify-center space-y-2">
+        <div className="flex items-center space-x-2">
+          <MonthNavigationHeader
+            currentDate={new Date(year, month - 1)}
+            availableMonths={availableMonths}
+            userId={dbUser.id}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -217,23 +296,23 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       </div>
 
       <div className="mt-2">
-        <Tabs defaultValue="prediction" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6 bg-muted/20 p-1 rounded-xl">
+        <Tabs defaultValue="prediction" className="w-full flex flex-col items-center">
+          <TabsList className="grid w-full grid-cols-3 mb-6 bg-muted/20 p-1 rounded-xl md:w-auto md:inline-flex md:mx-auto">
             <TabsTrigger
               value="prediction"
-              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold transition-all"
+              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold transition-all px-6"
             >
               Resumo do Dia
             </TabsTrigger>
             <TabsTrigger
               value="upcoming"
-              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold transition-all"
+              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold transition-all px-6"
             >
               Próximas
             </TabsTrigger>
             <TabsTrigger
               value="pending"
-              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold transition-all"
+              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold transition-all px-6"
             >
               Recentes
             </TabsTrigger>

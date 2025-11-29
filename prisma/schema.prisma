@@ -23,7 +23,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Configura????es
+  // Configurações
   isTitheEnabled      Boolean @default(true)
   planningAlertDays   Int     @default(5)
   role                UserRole @default(USER)

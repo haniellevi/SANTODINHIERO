@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import { isAdmin } from "@/lib/admin-utils";
 import { prisma } from "@/lib/db";
 
 export async function PUT(
-    req: Request,
+    req: NextRequest,
     { params }: { params: { id: string } }
 ) {
     try {
@@ -35,7 +35,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-    req: Request,
+    req: NextRequest,
     { params }: { params: { id: string } }
 ) {
     try {

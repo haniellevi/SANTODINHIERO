@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import { createClerkClient } from "@clerk/backend";
 import { isAdmin } from "@/lib/admin-utils";
@@ -8,7 +8,7 @@ const clerkClient = createClerkClient({
 });
 
 export async function POST(
-    req: Request,
+    req: NextRequest,
     { params }: { params: { id: string } }
 ) {
     try {
@@ -20,8 +20,13 @@ export async function POST(
 
         const { id } = params;
 
-        // Get the invitation to resend
-        const invitation = await clerkClient.invitations.getInvitation(id);
+        // Get all pending invitations and find the one we need
+        const allPendingInvitations = await clerkClient.invitations.getInvitationList({ status: 'pending' });
+        const invitation = allPendingInvitations.data.find(inv => inv.id === id);
+
+        if (!invitation) {
+            return new NextResponse("Invitation not found or not pending", { status: 404 });
+        }
 
         if (!invitation.emailAddress) {
             return new NextResponse("Invalid invitation", { status: 400 });

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import { createClerkClient } from "@clerk/backend";
 import { isAdmin } from "@/lib/admin-utils";
@@ -7,7 +7,7 @@ const clerkClient = createClerkClient({
     secretKey: process.env.CLERK_SECRET_KEY,
 });
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
         const user = await currentUser();
 
@@ -17,7 +17,7 @@ export async function GET() {
 
         // Get pending invitations from Clerk
         const invitations = await clerkClient.invitations.getInvitationList({
-            status: ["pending"],
+            status: "pending",
         });
 
         return NextResponse.json({

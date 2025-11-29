@@ -8,11 +8,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 interface MonthNavigationHeaderProps {
     currentDate: Date;
     availableMonths: { month: number; year: number }[];
+    userId: string;
 }
+
+import { MonthsManagementDialog } from "./months-management-dialog";
 
 export function MonthNavigationHeader({
     currentDate,
     availableMonths,
+    userId,
 }: MonthNavigationHeaderProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -56,20 +60,29 @@ export function MonthNavigationHeader({
     const formattedDate = new Intl.DateTimeFormat("pt-BR", {
         month: "long",
         year: "numeric",
-    }).format(currentDate);
+    }).format(currentDate).replace(" de ", " - ");
 
     return (
         <div className="flex items-center justify-between py-4">
-            <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleNavigation("prev")}
-                disabled={!hasPrevMonth}
-                className="size-10 rounded-full hover:bg-accent text-primary disabled:opacity-30"
-            >
-                <ChevronLeft className="h-5 w-5" />
-                <span className="sr-only">Mês anterior</span>
-            </Button>
+            <div className="flex items-center gap-2">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleNavigation("prev")}
+                    disabled={!hasPrevMonth}
+                    className="size-10 rounded-full hover:bg-accent text-primary disabled:opacity-30"
+                >
+                    <ChevronLeft className="h-5 w-5" />
+                    <span className="sr-only">Mês anterior</span>
+                </Button>
+
+                <MonthsManagementDialog
+                    availableMonths={availableMonths}
+                    currentMonth={currentMonth}
+                    currentYear={currentYear}
+                    userId={userId}
+                />
+            </div>
 
             <div className="flex flex-col items-center">
                 <h2 className="text-xl font-bold capitalize tracking-tight text-primary">

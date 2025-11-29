@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import { isAdmin } from "@/lib/admin-utils";
 import { prisma } from "@/lib/db";
 
 export async function PUT(
-    req: Request,
-    { params }: { params: { id: string } }
+    req: NextRequest,
+    context: { params: { id: string } }
 ) {
     try {
         const user = await currentUser();
@@ -14,7 +14,7 @@ export async function PUT(
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        const { id } = params;
+        const { id } = context.params;
         const body = await req.json();
 
         // Update plan
@@ -47,8 +47,8 @@ export async function PUT(
 }
 
 export async function DELETE(
-    req: Request,
-    { params }: { params: { id: string } }
+    req: NextRequest,
+    context: { params: { id: string } }
 ) {
     try {
         const user = await currentUser();
@@ -57,7 +57,7 @@ export async function DELETE(
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        const { id } = params;
+        const { id } = context.params;
 
         // Delete plan
         await prisma.plan.delete({

@@ -1,62 +1,69 @@
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
 
-# testing
-/coverage
-playwright-report/
-test-results/
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# Logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# local env files
+# Diagnostic reports (https://nodejs.org/api/report.html)
+.report/
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm/
+
+# Optional eslint cache
+.eslintcache
+
+# dotenv environment variables file
+.env.local
 .env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.staging.local
+
+# Next.js build output
+.next/
+out/
+
+# Vercel deployment files
+.vercel/
+
+# Prisma generated client
+prisma/generated/
+
+# Gemini temporary directory
+.gemini/
+
+# Backup SQL files
+*.sql
+
+# Local development files
 .env
 .env.check
 .env.check.prod
 .env.prod
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# prisma
-prisma/*.db
-prisma/*.db-journal
-prisma/generated/
-
-# clerk configuration (can include secrets)
-/.clerk/
-
-# hygiene
-*.log
-*.sql
-_backups/
-backups/
-__pycache__/
-
-# deploy logs
 build_log.txt
 deploy_log.txt
 deployments.txt
+next-env.d.ts
+tsconfig.tsbuildinfo
 
-# design files
-Novo-dasign/
+# User-specific temporary files
+tmp/
+node_modules

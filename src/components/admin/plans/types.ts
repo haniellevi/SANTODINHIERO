@@ -1,3 +1,8 @@
+import type { ClerkPlan } from '@/hooks/use-admin-plans';
+
+export type { ClerkPlan };
+
+
 export interface BillingPlan {
     planId?: string;
     clerkId: string | null;
@@ -20,7 +25,8 @@ export interface BillingPlan {
 }
 
 export interface PlanFeature {
-    text: string;
+    name: string;
+    description?: string | null;
     included: boolean;
 }
 
@@ -34,19 +40,4 @@ export interface SyncPreview {
     plans: ClerkPlan[];
     previewItems: SyncPreviewItem[];
     missing: Array<{ id: string; name: string }>;
-}
-
-export interface ClerkPlan {
-    id: string;
-    name?: string;
-    slug?: string;
-    prices?: Array<{
-        id: string;
-        unit_amount?: number;
-        currency?: string;
-        recurring?: {
-            interval?: string;
-            interval_count?: number;
-        };
-    }>;
 }

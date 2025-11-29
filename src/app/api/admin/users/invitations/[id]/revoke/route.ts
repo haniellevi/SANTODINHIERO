@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import { createClerkClient } from "@clerk/backend";
 import { isAdmin } from "@/lib/admin-utils";
@@ -8,7 +8,7 @@ const clerkClient = createClerkClient({
 });
 
 export async function POST(
-    req: Request,
+    req: NextRequest,
     { params }: { params: { id: string } }
 ) {
     try {

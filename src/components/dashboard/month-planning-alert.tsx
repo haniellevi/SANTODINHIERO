@@ -16,9 +16,11 @@ interface MonthPlanningAlertProps {
     currentYear: number;
     currentMonth: number;
     userId: string;
+    planningAlertDays: number;
+    nextMonthExists: boolean;
 }
 
-export function MonthPlanningAlert({ currentYear, currentMonth, userId }: MonthPlanningAlertProps) {
+export function MonthPlanningAlert({ currentYear, currentMonth, userId, planningAlertDays, nextMonthExists }: MonthPlanningAlertProps) {
     const [loading, setLoading] = useState(false);
 
     const showPlanAlert = shouldShowPlanNextMonthAlert(currentYear, currentMonth);
@@ -45,32 +47,18 @@ export function MonthPlanningAlert({ currentYear, currentMonth, userId }: MonthP
         }
     };
 
-    // Show review alert (3 days or less)
-    if (showReviewAlert) {
-        return (
-            <div className="flex flex-col gap-4 rounded-xl border border-accent-green/50 bg-accent-green/20 p-5">
-                <div className="flex flex-col gap-1">
-                    <p className="text-foreground text-base font-bold leading-tight">Últimos {daysRemaining} dias do mês!</p>
-                    <p className="text-accent-green/80 text-base font-normal leading-normal">
-                        Revise suas entradas e saídas antes do mês acabar.
-                    </p>
-                </div>
-            </div>
-        );
-    }
-
-    // Show plan alert (10 days or less, but more than 3)
-    if (showPlanAlert) {
+    // Show plan alert if next month doesn't exist AND we are within the alert window
+    if (!nextMonthExists && daysRemaining <= planningAlertDays) {
         return (
             <div className="relative overflow-hidden rounded-2xl bg-card p-[1px]">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/50 to-primary/30 opacity-50" />
                 <div className="relative flex flex-col gap-4 rounded-2xl bg-card/95 p-5 backdrop-blur-xl">
                     <div className="flex flex-col gap-1">
                         <p className="text-base font-bold leading-tight text-foreground">
-                            Faltam {daysRemaining} dias para o fim do mês!
+                            Planejar {nextMonthName}
                         </p>
                         <p className="text-sm font-medium leading-normal text-muted-foreground">
-                            Como deseja iniciar o planejamento de <span className="text-primary">{nextMonthName}</span>?
+                            O mês de {nextMonthName} está chegando. Como deseja iniciar?
                         </p>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -93,6 +81,19 @@ export function MonthPlanningAlert({ currentYear, currentMonth, userId }: MonthP
         );
     }
 
-    // Don't show alert if not within alert window
+    // Show review alert (3 days or less) ONLY if next month already exists (otherwise we show the plan alert above)
+    if (showReviewAlert) {
+        return (
+            <div className="flex flex-col gap-4 rounded-xl border border-accent-green/50 bg-accent-green/20 p-5">
+                <div className="flex flex-col gap-1">
+                    <p className="text-foreground text-base font-bold leading-tight">Últimos {daysRemaining} dias do mês!</p>
+                    <p className="text-accent-green/80 text-base font-normal leading-normal">
+                        Revise suas entradas e saídas antes do mês acabar.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
     return null;
 }

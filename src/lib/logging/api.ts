@@ -9,7 +9,7 @@ type RouteContext<TParams extends RouteParams = RouteParams> = {
 }
 
 type RouteHandler<TParams extends RouteParams = RouteParams> = (
-  request: Request,
+  request: NextRequest,
   context: RouteContext<TParams>
 ) => Promise<Response> | Response
 
@@ -78,7 +78,7 @@ export function withApiLogging<TParams extends RouteParams = RouteParams>(
   options: LoggingOptions = {}
 ) {
   return async function wrappedHandler(
-    request: Request,
+    request: NextRequest,
     context: RouteContext<TParams> = {}
   ) {
     if (!isApiLoggingEnabled()) {

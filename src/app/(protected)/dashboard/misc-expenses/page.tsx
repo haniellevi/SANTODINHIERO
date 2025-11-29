@@ -41,7 +41,7 @@ export default async function MiscExpensesPage({ searchParams }: MiscExpensesPag
     }));
 
     return (
-        <div className="container mx-auto p-4 md:p-8 max-w-7xl space-y-8">
+        <div className="container mx-auto p-4 md:p-8 max-w-5xl space-y-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Gastos Avulsos</h1>

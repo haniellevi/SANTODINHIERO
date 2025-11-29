@@ -447,3 +447,30 @@ export async function toggleIncomeTithePaid(incomeId: string, isTithePaid: boole
     });
     revalidatePath("/dashboard");
 }
+
+export async function deleteMonth(formData: FormData) {
+    const userId = formData.get("userId") as string;
+    const month = parseInt(formData.get("month") as string);
+    const year = parseInt(formData.get("year") as string);
+
+    if (!userId || !month || !year) {
+        throw new Error("Missing required fields");
+    }
+
+    try {
+        await prisma.month.delete({
+            where: {
+                userId_month_year: {
+                    userId,
+                    month,
+                    year,
+                },
+            },
+        });
+
+        revalidatePath("/dashboard");
+    } catch (error) {
+        console.error("Error deleting month:", error);
+        throw new Error("Failed to delete month");
+    }
+}
