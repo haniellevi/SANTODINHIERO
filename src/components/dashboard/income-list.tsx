@@ -22,6 +22,7 @@ import { EditIncomeDialog } from "./edit-income-dialog";
 import { cn } from "@/lib/utils";
 import { TransactionSummaryCard } from "./transaction-summary-card";
 import { SlideButton } from "@/components/ui/slide-button";
+import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 
 type SerializedIncome = Omit<MonthWithDetails["incomes"][number], "amount"> & { amount: number; isReceived: boolean };
 
@@ -31,6 +32,8 @@ interface IncomeListProps {
 
 export function IncomeList({ incomes: initialIncomes }: IncomeListProps) {
     const [incomes, setIncomes] = useState(initialIncomes);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<{ id: string, description: string } | null>(null);
     const currentDay = new Date().getDate();
 
     const totalUpToToday = incomes
@@ -47,10 +50,19 @@ export function IncomeList({ incomes: initialIncomes }: IncomeListProps) {
         setIncomes(initialIncomes);
     }, [initialIncomes]);
 
-    async function handleDelete(id: string) {
+    function handleDeleteClick(id: string, description: string) {
+        setItemToDelete({ id, description });
+        setDeleteDialogOpen(true);
+    }
+
+    async function confirmDelete() {
+        if (!itemToDelete) return;
+
         try {
-            await deleteItem(id, "income");
+            await deleteItem(itemToDelete.id, "income");
             toast.success("Receita removida");
+            setDeleteDialogOpen(false);
+            setItemToDelete(null);
         } catch (error) {
             toast.error("Erro ao remover receita");
         }
@@ -182,7 +194,7 @@ export function IncomeList({ incomes: initialIncomes }: IncomeListProps) {
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 className="h-8 w-8 text-muted-foreground hover:text-red-400 hover:bg-red-400/10 rounded-lg"
-                                                                onClick={() => handleDelete(income.id)}
+                                                                onClick={() => handleDeleteClick(income.id, income.description)}
                                                             >
                                                                 <Trash2 className="h-4 w-4" />
                                                             </Button>
@@ -251,7 +263,7 @@ export function IncomeList({ incomes: initialIncomes }: IncomeListProps) {
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 className="h-8 w-8 text-muted-foreground hover:text-red-400 hover:bg-red-400/10 rounded-lg"
-                                                                onClick={() => handleDelete(income.id)}
+                                                                onClick={() => handleDeleteClick(income.id, income.description)}
                                                             >
                                                                 <Trash2 className="h-4 w-4" />
                                                             </Button>
@@ -268,6 +280,13 @@ export function IncomeList({ incomes: initialIncomes }: IncomeListProps) {
                     </Droppable>
                 </div>
             </DragDropContext>
+
+            <DeleteConfirmationDialog
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+                onConfirm={confirmDelete}
+                itemName={itemToDelete?.description}
+            />
         </div>
     );
 }

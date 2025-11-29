@@ -23,6 +23,7 @@ import { EmptyState } from "./empty-state";
 import { EditExpenseDialog } from "./edit-expense-dialog";
 import { TransactionSummaryCard } from "./transaction-summary-card";
 import { cn } from "@/lib/utils";
+import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 
 type SerializedExpense = Omit<MonthWithDetails["expenses"][number], "totalAmount" | "paidAmount"> & {
     totalAmount: number;
@@ -71,6 +72,8 @@ export function ExpenseList({
 }: ExpenseListProps) {
     const [expenses, setExpenses] = useState(initialExpenses);
     const [incomes, setIncomes] = useState(initialIncomes);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<{ id: string, description: string } | null>(null);
 
     useEffect(() => {
         setExpenses(initialExpenses);
@@ -128,10 +131,19 @@ export function ExpenseList({
         return 0;
     });
 
-    async function handleDelete(id: string) {
+    function handleDeleteClick(id: string, description: string) {
+        setItemToDelete({ id, description });
+        setDeleteDialogOpen(true);
+    }
+
+    async function confirmDelete() {
+        if (!itemToDelete) return;
+
         try {
-            await deleteItem(id, "expense");
+            await deleteItem(itemToDelete.id, "expense");
             toast.success("Despesa removida");
+            setDeleteDialogOpen(false);
+            setItemToDelete(null);
         } catch (error) {
             toast.error("Erro ao remover despesa");
         }
@@ -289,19 +301,20 @@ export function ExpenseList({
                                                         </TableCell>
                                                         <TableCell className="font-medium border-y border-border/50 whitespace-normal min-w-[150px]">{expense.description}</TableCell>
                                                         <TableCell className="border-y border-border/50">{expense.dayOfMonth || "-"}</TableCell>
-                                                        <TableCell className="w-[180px] border-y border-border/50">
-                                                            <div className="flex flex-col gap-1.5">
-                                                                <div className="flex justify-between text-xs">
-                                                                    <span className="text-muted-foreground">Pago: {formatCurrency(paid)}</span>
-                                                                </div>
-                                                                <Progress value={percentage} className="h-1.5 bg-muted/50" indicatorClassName="bg-rose-500" />
-                                                            </div>
+                                                        <TableCell className="text-xs text-muted-foreground border-y border-border/50 w-[200px]">
+                                                            <SlideButton
+                                                                isConfirmed={Number(expense.paidAmount) >= Number(expense.totalAmount)}
+                                                                onConfirm={async () => await handleTogglePaid(expense.id, !(Number(expense.paidAmount) >= Number(expense.totalAmount)))}
+                                                                label="Arrastar para pagar"
+                                                                confirmedLabel="Pago"
+                                                                variant="expense"
+                                                            />
                                                         </TableCell>
                                                         <TableCell className="text-right font-bold text-lg border-y border-border/50 text-rose-500">{formatCurrency(total)}</TableCell>
                                                         <TableCell className="rounded-r-lg border-y border-r border-border/50">
                                                             <div className="flex items-center justify-end gap-1">
                                                                 <EditExpenseDialog expense={expense} />
-                                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => handleDelete(expense.id)}>
+                                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => handleDeleteClick(expense.id, expense.description)}>
                                                                     <Trash2 className="h-4 w-4" />
                                                                 </Button>
                                                             </div>
@@ -403,7 +416,7 @@ export function ExpenseList({
                                                             </div>
                                                             <div className="flex items-center gap-1 shrink-0">
                                                                 <EditExpenseDialog expense={expense} />
-                                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => handleDelete(expense.id)}>
+                                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-400 hover:bg-red-400/10 rounded-lg" onClick={() => handleDeleteClick(expense.id, expense.description)}>
                                                                     <Trash2 className="h-4 w-4" />
                                                                 </Button>
                                                             </div>
@@ -420,6 +433,13 @@ export function ExpenseList({
                     </Droppable>
                 </div>
             </DragDropContext>
+
+            <DeleteConfirmationDialog
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+                onConfirm={confirmDelete}
+                itemName={itemToDelete?.description}
+            />
         </div>
     );
 }

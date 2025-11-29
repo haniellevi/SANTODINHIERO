@@ -48,7 +48,7 @@ export function BottomNav() {
 
     return (
         <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#0a0a0a] border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
-            <div className="flex items-center justify-around h-16 px-2 pb-2">
+            <div className="flex items-center justify-center gap-2 h-16 px-2 pb-2">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href;
                     const Icon = item.icon;
@@ -59,7 +59,7 @@ export function BottomNav() {
                             href={item.href}
                             className={cn(
                                 "relative flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-2xl transition-all duration-300",
-                                "min-w-[70px] group",
+                                "min-w-[60px] group",
                                 isActive
                                     ? "bg-gradient-to-b from-white/10 to-transparent border border-white/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2)]"
                                     : "hover:bg-white/5"

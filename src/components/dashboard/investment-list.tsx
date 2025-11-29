@@ -22,6 +22,7 @@ import { EditInvestmentDialog } from "./edit-investment-dialog";
 import { cn } from "@/lib/utils";
 import { TransactionSummaryCard } from "./transaction-summary-card";
 import { SlideButton } from "@/components/ui/slide-button";
+import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 
 type SerializedInvestment = Omit<MonthWithDetails["investments"][number], "amount"> & { amount: number; isPaid: boolean };
 
@@ -31,6 +32,8 @@ interface InvestmentListProps {
 
 export function InvestmentList({ investments: initialInvestments }: InvestmentListProps) {
     const [investments, setInvestments] = useState(initialInvestments);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<{ id: string, description: string } | null>(null);
     const currentDay = new Date().getDate();
 
     const totalUpToToday = investments
@@ -47,10 +50,19 @@ export function InvestmentList({ investments: initialInvestments }: InvestmentLi
         setInvestments(initialInvestments);
     }, [initialInvestments]);
 
-    async function handleDelete(id: string) {
+    function handleDeleteClick(id: string, description: string) {
+        setItemToDelete({ id, description });
+        setDeleteDialogOpen(true);
+    }
+
+    async function confirmDelete() {
+        if (!itemToDelete) return;
+
         try {
-            await deleteItem(id, "investment");
+            await deleteItem(itemToDelete.id, "investment");
             toast.success("Investimento removido");
+            setDeleteDialogOpen(false);
+            setItemToDelete(null);
         } catch (error) {
             toast.error("Erro ao remover investimento");
         }
@@ -182,7 +194,7 @@ export function InvestmentList({ investments: initialInvestments }: InvestmentLi
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 className="h-8 w-8 text-muted-foreground hover:text-red-400 hover:bg-red-400/10 rounded-lg"
-                                                                onClick={() => handleDelete(investment.id)}
+                                                                onClick={() => handleDeleteClick(investment.id, investment.description)}
                                                             >
                                                                 <Trash2 className="h-4 w-4" />
                                                             </Button>
@@ -251,7 +263,7 @@ export function InvestmentList({ investments: initialInvestments }: InvestmentLi
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 className="h-8 w-8 text-muted-foreground hover:text-red-400 hover:bg-red-400/10 rounded-lg"
-                                                                onClick={() => handleDelete(investment.id)}
+                                                                onClick={() => handleDeleteClick(investment.id, investment.description)}
                                                             >
                                                                 <Trash2 className="h-4 w-4" />
                                                             </Button>
@@ -268,6 +280,13 @@ export function InvestmentList({ investments: initialInvestments }: InvestmentLi
                     </Droppable>
                 </div>
             </DragDropContext>
+
+            <DeleteConfirmationDialog
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+                onConfirm={confirmDelete}
+                itemName={itemToDelete?.description}
+            />
         </div>
     );
 }

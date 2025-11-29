@@ -22,6 +22,7 @@ import { EditMiscExpenseDialog } from "./edit-misc-expense-dialog";
 import { cn } from "@/lib/utils";
 import { TransactionSummaryCard } from "./transaction-summary-card";
 import { SlideButton } from "@/components/ui/slide-button";
+import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 
 type SerializedMiscExpense = Omit<MonthWithDetails["miscExpenses"][number], "amount"> & { amount: number; isPaid: boolean };
 
@@ -31,6 +32,8 @@ interface MiscExpenseListProps {
 
 export function MiscExpenseList({ miscExpenses: initialMiscExpenses }: MiscExpenseListProps) {
     const [miscExpenses, setMiscExpenses] = useState(initialMiscExpenses);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<{ id: string, description: string } | null>(null);
     const currentDay = new Date().getDate();
 
     const totalUpToToday = miscExpenses
@@ -47,10 +50,19 @@ export function MiscExpenseList({ miscExpenses: initialMiscExpenses }: MiscExpen
         setMiscExpenses(initialMiscExpenses);
     }, [initialMiscExpenses]);
 
-    async function handleDelete(id: string) {
+    function handleDeleteClick(id: string, description: string) {
+        setItemToDelete({ id, description });
+        setDeleteDialogOpen(true);
+    }
+
+    async function confirmDelete() {
+        if (!itemToDelete) return;
+
         try {
-            await deleteItem(id, "misc");
+            await deleteItem(itemToDelete.id, "misc");
             toast.success("Gasto avulso removido");
+            setDeleteDialogOpen(false);
+            setItemToDelete(null);
         } catch (error) {
             toast.error("Erro ao remover gasto avulso");
         }
@@ -182,7 +194,7 @@ export function MiscExpenseList({ miscExpenses: initialMiscExpenses }: MiscExpen
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 className="h-8 w-8 text-muted-foreground hover:text-red-400 hover:bg-red-400/10 rounded-lg"
-                                                                onClick={() => handleDelete(miscExpense.id)}
+                                                                onClick={() => handleDeleteClick(miscExpense.id, miscExpense.description)}
                                                             >
                                                                 <Trash2 className="h-4 w-4" />
                                                             </Button>
@@ -251,7 +263,7 @@ export function MiscExpenseList({ miscExpenses: initialMiscExpenses }: MiscExpen
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 className="h-8 w-8 text-muted-foreground hover:text-red-400 hover:bg-red-400/10 rounded-lg"
-                                                                onClick={() => handleDelete(miscExpense.id)}
+                                                                onClick={() => handleDeleteClick(miscExpense.id, miscExpense.description)}
                                                             >
                                                                 <Trash2 className="h-4 w-4" />
                                                             </Button>
@@ -268,6 +280,13 @@ export function MiscExpenseList({ miscExpenses: initialMiscExpenses }: MiscExpen
                     </Droppable>
                 </div>
             </DragDropContext>
+
+            <DeleteConfirmationDialog
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+                onConfirm={confirmDelete}
+                itemName={itemToDelete?.description}
+            />
         </div>
     );
 }
