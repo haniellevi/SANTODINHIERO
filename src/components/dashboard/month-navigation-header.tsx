@@ -23,6 +23,8 @@ export function MonthNavigationHeader({
     const router = useRouter();
     const searchParams = useSearchParams();
 
+    console.log(`[MonthNavigationHeader] Received props: month=${currentMonth}, year=${currentYear}`);
+
     // Helper to compare months numerically (year * 12 + month)
     const getMonthValue = (m: { month: number; year: number }) => m.year * 12 + m.month;
     const currentMonthValue = currentYear * 12 + currentMonth;

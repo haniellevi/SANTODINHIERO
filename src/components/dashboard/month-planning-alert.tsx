@@ -55,6 +55,7 @@ export function MonthPlanningAlert({ currentYear, currentMonth, userId, planning
             await duplicateMonth(formData);
             toast.success(`Mês de ${nextMonthName} criado com sucesso!`);
             setShowDuplicateDialog(false);
+            router.push(`/dashboard?month=${nextMonth.month}&year=${nextMonth.year}`);
             router.refresh();
         } catch (error) {
             toast.error("Erro ao duplicar mês");
@@ -82,6 +83,7 @@ export function MonthPlanningAlert({ currentYear, currentMonth, userId, planning
 
             toast.success(`Mês de ${nextMonthName} criado do zero!`);
             setShowStartFreshDialog(false);
+            router.push(`/dashboard?month=${nextMonth.month}&year=${nextMonth.year}`);
             router.refresh();
         } catch (error) {
             toast.error("Erro ao criar mês");
