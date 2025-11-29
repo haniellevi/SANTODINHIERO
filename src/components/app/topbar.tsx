@@ -6,38 +6,33 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
-import Image from "next/image";
-
-import { site } from "@/lib/brand-config";
+import { Logo } from "@/components/logo";
 
 export function Topbar() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-20 w-full border-b border-border/40 bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/90"
+        "sticky top-0 z-20 w-full border-b transition-colors duration-300",
+        "bg-white/80 border-slate-200 supports-[backdrop-filter]:bg-white/60", // Light Mode
+        "dark:bg-dark/95 dark:border-white/5 dark:supports-[backdrop-filter]:bg-dark/90" // Dark Mode
       )}
       role="banner"
     >
-      <div className="glow-separator w-full" aria-hidden="true" />
+      <div className="glow-separator w-full opacity-0 dark:opacity-100 transition-opacity" aria-hidden="true" />
       <div className="flex h-16 items-center gap-2 px-3 md:px-4">
 
         {/* Brand with Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative h-12 w-12 rounded-full bg-primary shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-all flex items-center justify-center overflow-visible">
-            <Image
-              src="/logo-coroa.svg"
-              alt={site.shortName}
-              width={32}
-              height={32}
-              className="object-contain"
-              priority
-            />
+          <div className="relative h-10 w-10 flex items-center justify-center">
+            <Logo className="w-10 h-10" variant="icon" />
           </div>
           <div className="flex flex-col">
-            <span className="text-lg font-bold text-primary dark:brand-gradient whitespace-nowrap">
+            <span className="text-lg font-bold whitespace-nowrap transition-colors text-slate-900 dark:text-white group-hover:text-primary dark:group-hover:text-gold">
               Santo Dinheiro
             </span>
-            <span className="text-[10px] text-muted-foreground tracking-wider whitespace-nowrap">Finanças Protegidas</span>
+            <span className="text-[10px] tracking-wider whitespace-nowrap uppercase font-medium text-slate-500 dark:text-slate-400">
+              Gestão com Fidelidade
+            </span>
           </div>
         </Link>
 

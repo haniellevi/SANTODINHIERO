@@ -31,6 +31,13 @@ const config: Config = {
 				'purple-dark': '#1A1430',
 				'purple-primary': '#7B34FF',
 				'purple-light': '#9D6FFF',
+
+				// New Design System Colors
+				dark: '#0b1121',
+				gold: '#fbbf24',
+				surface: '#1e293b',
+				primaryDark: '#4c1d95',
+
 				// Cores de accent
 				'accent-blue': '#5B8DEF',
 				'accent-yellow': '#F59E0B',

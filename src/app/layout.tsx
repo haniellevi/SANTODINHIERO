@@ -32,7 +32,7 @@ export default function RootLayout({
     <ClerkProvider localization={ptBR}>
       <html lang="pt-br" suppressHydrationWarning>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased  text-foreground`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased text-slate-900 dark:text-slate-50 bg-background`}
         >
           <QueryProvider>
             <ThemeProvider>
