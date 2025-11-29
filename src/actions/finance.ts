@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import { ExpenseType } from "../../prisma/generated/client";
+import { ExpenseType } from "@prisma/client";
 import { z } from "zod";
 
 // Schemas for validation

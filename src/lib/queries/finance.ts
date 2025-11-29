@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { Month, Income, Expense, Investment, MiscExpense } from "../../../prisma/generated/client";
+import { Month, Income, Expense, Investment, MiscExpense } from "@prisma/client";
 
 export type MonthWithDetails = Month & {
     incomes: Income[];
