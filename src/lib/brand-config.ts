@@ -22,7 +22,7 @@ export const site = {
   shortName: 'Santo Dinheiro',
   description:
     'Entradas, Saídas, Investimentos e Gastos Avulsos. De um Jeito tão simples que você vai amar!',
-  url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  url: (process.env.NEXT_PUBLIC_APP_URL?.startsWith('http') ? process.env.NEXT_PUBLIC_APP_URL : `https://${process.env.NEXT_PUBLIC_APP_URL}`) || 'http://localhost:3000',
   author: 'Rvs Tecnologia',
   keywords: ['Mordomia Cristão', 'Orçamento Familiar', 'Jesus', 'Dinheiro', 'Investimento', 'Gestão Financeira', 'Gastos Avulsos', 'Entradas', 'Saídas', 'Investimentos', 'Prosperidade', 'Inteligência Financeira'],
   ogImage: '/og-image-share.png',
