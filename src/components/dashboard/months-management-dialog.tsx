@@ -47,8 +47,18 @@ export function MonthsManagementDialog({
     });
 
     const handleDelete = async (month: number, year: number) => {
-        // Prevent deleting past months
+        // Get real-time current month/year
         const now = new Date();
+        const realTimeMonth = now.getMonth() + 1;
+        const realTimeYear = now.getFullYear();
+
+        // Prevent deleting the current real-time month
+        if (month === realTimeMonth && year === realTimeYear) {
+            toast.error("Não é possível excluir o mês atual.");
+            return;
+        }
+
+        // Prevent deleting past months
         const targetDate = new Date(year, month - 1);
         const currentDate = new Date(now.getFullYear(), now.getMonth());
 

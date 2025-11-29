@@ -296,7 +296,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       <div className="flex items-center justify-center space-y-2">
         <div className="flex items-center space-x-2">
           <MonthNavigationHeader
-            currentDate={new Date(year, month - 1)}
+            currentMonth={month}
+            currentYear={year}
             availableMonths={availableMonths}
             userId={dbUser.id}
           />

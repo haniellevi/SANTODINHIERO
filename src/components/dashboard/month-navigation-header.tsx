@@ -4,25 +4,24 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { formatMonthYear } from "@/lib/date-utils";
+import { formatMonthYearFromNumbers } from "@/lib/date-utils";
 import { MonthsManagementDialog } from "./months-management-dialog";
 
 interface MonthNavigationHeaderProps {
-    currentDate: Date;
+    currentMonth: number;
+    currentYear: number;
     availableMonths: { month: number; year: number }[];
     userId: string;
 }
 
 export function MonthNavigationHeader({
-    currentDate,
+    currentMonth,
+    currentYear,
     availableMonths,
     userId,
 }: MonthNavigationHeaderProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
-
-    const currentMonth = currentDate.getMonth() + 1;
-    const currentYear = currentDate.getFullYear();
 
     // Check if previous/next month exists
     const prevMonth = availableMonths
@@ -51,7 +50,7 @@ export function MonthNavigationHeader({
         router.push(`/dashboard?${params.toString()}`);
     };
 
-    const formattedDate = formatMonthYear(currentDate);
+    const formattedDate = formatMonthYearFromNumbers(currentMonth, currentYear);
 
     return (
         <div className="flex items-center justify-between py-4">
