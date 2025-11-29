@@ -10,211 +10,294 @@ import { MonthPlanningAlert } from "@/components/dashboard/month-planning-alert"
 import { RecentTransactionsList, Transaction } from "@/components/dashboard/recent-transactions-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UpcomingActionsList } from "@/components/dashboard/upcoming-actions-list";
-// Sum of Incomes (scheduled <= today) - Sum of Outflows (scheduled <= today)
-// Regardless of paid status, as it is a "prediction" based on schedule.
+import { ReceiptSummary } from "@/components/dashboard/receipt-summary";
+import { getNextMonth } from "@/lib/month-utils";
 
-const predictedIncomes = currentMonth.incomes
-  .filter(i => (i.dayOfMonth || 32) <= currentDay || i.isReceived)
-  .reduce((acc, curr) => acc + Number(curr.amount), 0);
+import { Metadata } from "next";
+import { prisma } from "@/lib/db";
 
-const predictedExpenses = currentMonth.expenses
-  .filter(e => ((e.dayOfMonth || 32) <= currentDay || Number(e.paidAmount) > 0) && (e.type === "STANDARD" || e.type === "TITHE"))
-  .reduce((acc, curr) => acc + Number(curr.totalAmount), 0);
+export const metadata: Metadata = {
+  title: "Dashboard Financeiro",
+  description: "Visão geral das suas finanças",
+};
 
-const predictedInvestments = currentMonth.investments
-  .filter(i => (i.dayOfMonth || 32) <= currentDay || i.isPaid)
-  .reduce((acc, curr) => acc + Number(curr.amount), 0);
+interface DashboardPageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
 
-const predictedMisc = currentMonth.miscExpenses
-  .filter(m => (m.dayOfMonth || 32) <= currentDay || m.isPaid)
-  .reduce((acc, curr) => acc + Number(curr.amount), 0);
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const clerkUser = await currentUser();
 
-const predictedBalance = predictedIncomes - (predictedExpenses + predictedInvestments + predictedMisc);
+  if (!clerkUser) {
+    redirect("/sign-in");
+  }
 
-// Cálculos detalhados para o ReceiptSummary
-const incomesReceived = currentMonth.incomes
-  .filter(i => i.isReceived)
-  .reduce((acc, curr) => acc + Number(curr.amount), 0);
-const incomesRemainingTotal = currentMonth.incomes
-  .filter(i => !i.isReceived && (i.dayOfMonth || 32) > currentDay)
-  .reduce((acc, curr) => acc + Number(curr.amount), 0);
+  const dbUser = await getUserFromClerkId(clerkUser.id);
+  console.log('[Dashboard] User found:', dbUser.id);
 
-const expensesPaid = currentMonth.expenses
-  .filter(e => (e.dayOfMonth || 32) <= currentDay && (e.type === "STANDARD" || e.type === "TITHE"))
-  .reduce((acc, curr) => acc + Number(curr.paidAmount), 0);
-const expensesRemainingTotal = currentMonth.expenses
-  .filter(e => (e.dayOfMonth || 32) > currentDay && (e.type === "STANDARD" || e.type === "TITHE"))
-  .reduce((acc, curr) => acc + Number(curr.totalAmount), 0);
+  const params = await searchParams;
 
-const investmentsPaid = currentMonth.investments
-  .filter(i => i.isPaid)
-  .reduce((acc, curr) => acc + Number(curr.amount), 0);
-const investmentsRemainingTotal = currentMonth.investments
-  .filter(i => !i.isPaid && (i.dayOfMonth || 32) > currentDay)
-  .reduce((acc, curr) => acc + Number(curr.amount), 0);
+  const now = new Date();
+  const monthParam = params?.month;
+  const yearParam = params?.year;
 
-const miscPaid = currentMonth.miscExpenses
-  .filter(m => m.isPaid)
-  .reduce((acc, curr) => acc + Number(curr.amount), 0);
-const miscRemainingTotal = currentMonth.miscExpenses
-  .filter(m => !m.isPaid && (m.dayOfMonth || 32) > currentDay)
-  .reduce((acc, curr) => acc + Number(curr.amount), 0);
+  const month = monthParam ? parseInt(monthParam as string) : now.getMonth() + 1;
+  const year = yearParam ? parseInt(yearParam as string) : now.getFullYear();
 
-// Cálculos para a aba de Resumo do Dia
-const titheAmount = totals.titheAmount;
+  // Get all available months for navigation
+  console.log('[Dashboard] Fetching user months...');
+  const availableMonths = await getUserMonths(dbUser.id);
+  console.log('[Dashboard] Available months:', availableMonths.length);
 
-// Incomes - valores até hoje, recebidos e restantes
-const totalIncomesReceived = currentMonth.incomes
-  .filter(i => i.isReceived)
-  .reduce((acc, curr) => acc + Number(curr.amount), 0);
-const totalIncomesRemaining = predictedIncomes - totalIncomesReceived;
-const totalIncomesOverall = currentMonth.incomes.reduce((acc, curr) => acc + Number(curr.amount), 0);
+  // If no months exist at all, create ONLY the current month
+  if (availableMonths.length === 0) {
+    const currentMonthNow = now.getMonth() + 1;
+    const currentYearNow = now.getFullYear();
 
-// Expenses - valores até hoje, pagos e restantes (incluindo dízimo)
-const totalExpensesPaidOnly = currentMonth.expenses
-  .filter(e => (e.dayOfMonth || 32) <= currentDay)
-  .reduce((acc, curr) => acc + Number(curr.paidAmount), 0);
-const totalExpensesRemaining = (predictedExpenses + titheAmount) - (totalExpensesPaidOnly + (currentMonth.isTithePaid ? titheAmount : 0));
-const totalExpensesOverall = currentMonth.expenses.reduce((acc, curr) => acc + Number(curr.totalAmount), 0);
+    await prisma.month.create({
+      data: {
+        userId: dbUser.id,
+        month: currentMonthNow,
+        year: currentYearNow,
+      },
+    });
 
-// Investments - valores até hoje, pagos e restantes
-const totalInvestmentsPaid = currentMonth.investments
-  .filter(i => (i.dayOfMonth || 32) <= currentDay && i.isPaid)
-  .reduce((acc, curr) => acc + Number(curr.amount), 0);
-const totalInvestmentsRemaining = predictedInvestments - totalInvestmentsPaid;
-const totalInvestmentsOverall = currentMonth.investments.reduce((acc, curr) => acc + Number(curr.amount), 0);
+    // Redirect to current month
+    redirect(`/dashboard?month=${currentMonthNow}&year=${currentYearNow}`);
+  }
 
-// Misc Expenses - valores até hoje, pagos e restantes
-const totalMiscPaid = currentMonth.miscExpenses
-  .filter(m => (m.dayOfMonth || 32) <= currentDay && m.isPaid)
-  .reduce((acc, curr) => acc + Number(curr.amount), 0);
-const totalMiscRemaining = predictedMisc - totalMiscPaid;
-const totalMiscOverall = currentMonth.miscExpenses.reduce((acc, curr) => acc + Number(curr.amount), 0);
+  // Check if requested month exists
+  console.log(`[Dashboard] Fetching month ${month}/${year}...`);
+  const currentMonth = await getMonthByDate(dbUser.id, month, year);
+  console.log('[Dashboard] Month found:', !!currentMonth);
 
-const nextUpcomingIncome = currentMonth.incomes
-  .filter(i => (i.dayOfMonth || 0) > currentDay && !i.isReceived)
-  .sort((a, b) => (a.dayOfMonth || 32) - (b.dayOfMonth || 32))
-  .at(0); // get the first one
+  // If month doesn't exist, redirect to the most recent month
+  if (!currentMonth) {
+    const latestMonth = availableMonths[availableMonths.length - 1];
+    redirect(`/dashboard?month=${latestMonth.month}&year=${latestMonth.year}`);
+  }
 
-// Combine transactions - use updatedAt to show recent pay/receive actions
-const transactions: Transaction[] = [
-  ...currentMonth.incomes.map(i => ({ id: i.id, type: "income" as const, description: i.description, amount: Number(i.amount), date: i.updatedAt })),
-  ...currentMonth.expenses.map(e => ({ id: e.id, type: "expense" as const, description: e.description, amount: Number(e.totalAmount), date: e.updatedAt })),
-  ...currentMonth.investments.map(i => ({ id: i.id, type: "investment" as const, description: i.description, amount: Number(i.amount), date: i.updatedAt })),
-  ...currentMonth.miscExpenses.map(m => ({ id: m.id, type: "misc" as const, description: m.description, amount: Number(m.amount), date: m.updatedAt })),
-].sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
-  .slice(0, 10); // Show last 10
+  // Check if next month exists for planning alert logic
+  const nextMonthDate = getNextMonth(year, month);
+  const nextMonthExists = await prisma.month.findFirst({
+    where: {
+      userId: dbUser.id,
+      month: nextMonthDate.month,
+      year: nextMonthDate.year
+    }
+  });
 
-const currentDate = new Date(year, month - 1);
+  const totals = calculateTotals(currentMonth);
 
-return (
-  <div className="flex min-h-screen flex-col gap-6 pb-32 pt-4 px-4 md:px-8 max-w-5xl mx-auto w-full">
-    <MonthNavigationHeader currentDate={currentDate} availableMonths={availableMonths} />
+  const currentDay = new Date().getDate();
 
-    <div className="flex flex-col items-center justify-center py-8">
-      <h1 className={`text-5xl font-bold tracking-tighter ${totals.balance > 0 ? "text-emerald-500" : totals.balance < 0 ? "text-red-500" : "text-foreground"}`}>
-        {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totals.balance)}
-      </h1>
-      <p className="mt-2 text-sm font-medium text-muted-foreground uppercase tracking-widest">Saldo do Mês</p>
-    </div>
+  // Predicted Balance:
+  // "O saldo do dia é o previsto para aquela data levando em consideração o dia de cada ação"
+  // Sum of Incomes (scheduled <= today) - Sum of Outflows (scheduled <= today)
+  // Regardless of paid status, as it is a "prediction" based on schedule.
 
-    <div className="grid grid-cols-2 gap-4">
-      <IncomeCard total={totals.totalIncome} />
-      <ExpenseCard total={totals.totalExpense} />
-    </div>
+  const predictedIncomes = currentMonth.incomes
+    .filter(i => (i.dayOfMonth || 32) <= currentDay || i.isReceived)
+    .reduce((acc, curr) => acc + Number(curr.amount), 0);
 
-    <div className="w-full">
-      <MonthPlanningAlert
-        currentYear={year}
-        currentMonth={month}
-        userId={dbUser.id}
-        planningAlertDays={dbUser.planningAlertDays}
-        nextMonthExists={!!nextMonthExists}
-      />
-    </div>
+  const predictedExpenses = currentMonth.expenses
+    .filter(e => ((e.dayOfMonth || 32) <= currentDay || Number(e.paidAmount) > 0) && (e.type === "STANDARD" || e.type === "TITHE"))
+    .reduce((acc, curr) => acc + Number(curr.totalAmount), 0);
 
-    <div className="mt-2">
-      <Tabs defaultValue="prediction" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-6 bg-muted/20 p-1 rounded-xl">
-          <TabsTrigger
-            value="prediction"
-            className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold transition-all"
-          >
-            Resumo do Dia
-          </TabsTrigger>
-          <TabsTrigger
-            value="upcoming"
-            className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold transition-all"
-          >
-            Próximas
-          </TabsTrigger>
-          <TabsTrigger
-            value="pending"
-            className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold transition-all"
-          >
-            Recentes
-          </TabsTrigger>
-        </TabsList>
+  const predictedInvestments = currentMonth.investments
+    .filter(i => (i.dayOfMonth || 32) <= currentDay || i.isPaid)
+    .reduce((acc, curr) => acc + Number(curr.amount), 0);
 
-        <TabsContent value="prediction" className="mt-0 outline-none animate-in fade-in-50 slide-in-from-bottom-2">
-          <ReceiptSummary
-            userName={dbUser.name?.split(" ")[0] || "Usuário"}
-            currentDay={currentDay}
-            incomesUpToToday={predictedIncomes}
-            incomesReceived={incomesReceived}
-            incomesRemaining={incomesRemainingTotal}
-            expensesUpToToday={predictedExpenses}
-            expensesPaid={expensesPaid}
-            expensesRemaining={expensesRemainingTotal}
-            investmentsUpToToday={predictedInvestments}
-            investmentsPaid={investmentsPaid}
-            investmentsRemaining={investmentsRemainingTotal}
-            miscUpToToday={predictedMisc}
-            miscPaid={miscPaid}
-            miscRemaining={miscRemainingTotal}
-            balance={predictedBalance}
-            nextUpcomingIncome={nextUpcomingIncome ? { dayOfMonth: nextUpcomingIncome.dayOfMonth, amount: Number(nextUpcomingIncome.amount) } : undefined}
-          />
-        </TabsContent>
+  const predictedMisc = currentMonth.miscExpenses
+    .filter(m => (m.dayOfMonth || 32) <= currentDay || m.isPaid)
+    .reduce((acc, curr) => acc + Number(curr.amount), 0);
 
-        <TabsContent value="upcoming" className="mt-0 outline-none animate-in fade-in-50 slide-in-from-bottom-2">
-          <UpcomingActionsList
-            actions={[
-              ...currentMonth.incomes.map(i => ({
-                id: i.id,
-                type: "income" as const,
-                description: i.description,
-                amount: Number(i.amount),
-                dayOfMonth: i.dayOfMonth
-              })),
-              ...currentMonth.expenses
-                .filter(e => Number(e.paidAmount) < Number(e.totalAmount)) // Only pending/partial expenses
-                .map(e => ({
-                  id: e.id,
-                  type: "expense" as const,
-                  description: e.description,
-                  amount: Number(e.totalAmount) - Number(e.paidAmount), // Remaining amount
-                  dayOfMonth: e.dayOfMonth,
-                  status: Number(e.paidAmount) > 0 ? "partial" as const : "pending" as const
+  const predictedBalance = predictedIncomes - (predictedExpenses + predictedInvestments + predictedMisc);
+
+  // Cálculos detalhados para o ReceiptSummary
+  const incomesReceived = currentMonth.incomes
+    .filter(i => i.isReceived)
+    .reduce((acc, curr) => acc + Number(curr.amount), 0);
+  const incomesRemainingTotal = currentMonth.incomes
+    .filter(i => !i.isReceived && (i.dayOfMonth || 32) > currentDay)
+    .reduce((acc, curr) => acc + Number(curr.amount), 0);
+
+  const expensesPaid = currentMonth.expenses
+    .filter(e => (e.dayOfMonth || 32) <= currentDay && (e.type === "STANDARD" || e.type === "TITHE"))
+    .reduce((acc, curr) => acc + Number(curr.paidAmount), 0);
+  const expensesRemainingTotal = currentMonth.expenses
+    .filter(e => (e.dayOfMonth || 32) > currentDay && (e.type === "STANDARD" || e.type === "TITHE"))
+    .reduce((acc, curr) => acc + Number(curr.totalAmount), 0);
+
+  const investmentsPaid = currentMonth.investments
+    .filter(i => i.isPaid)
+    .reduce((acc, curr) => acc + Number(curr.amount), 0);
+  const investmentsRemainingTotal = currentMonth.investments
+    .filter(i => !i.isPaid && (i.dayOfMonth || 32) > currentDay)
+    .reduce((acc, curr) => acc + Number(curr.amount), 0);
+
+  const miscPaid = currentMonth.miscExpenses
+    .filter(m => m.isPaid)
+    .reduce((acc, curr) => acc + Number(curr.amount), 0);
+  const miscRemainingTotal = currentMonth.miscExpenses
+    .filter(m => !m.isPaid && (m.dayOfMonth || 32) > currentDay)
+    .reduce((acc, curr) => acc + Number(curr.amount), 0);
+
+  // Cálculos para a aba de Resumo do Dia
+  const titheAmount = totals.titheAmount;
+
+  // Incomes - valores até hoje, recebidos e restantes
+  const totalIncomesReceived = currentMonth.incomes
+    .filter(i => i.isReceived)
+    .reduce((acc, curr) => acc + Number(curr.amount), 0);
+  const totalIncomesRemaining = predictedIncomes - totalIncomesReceived;
+  const totalIncomesOverall = currentMonth.incomes.reduce((acc, curr) => acc + Number(curr.amount), 0);
+
+  // Expenses - valores até hoje, pagos e restantes (incluindo dízimo)
+  const totalExpensesPaidOnly = currentMonth.expenses
+    .filter(e => (e.dayOfMonth || 32) <= currentDay)
+    .reduce((acc, curr) => acc + Number(curr.paidAmount), 0);
+  const totalExpensesRemaining = (predictedExpenses + titheAmount) - (totalExpensesPaidOnly + (currentMonth.isTithePaid ? titheAmount : 0));
+  const totalExpensesOverall = currentMonth.expenses.reduce((acc, curr) => acc + Number(curr.totalAmount), 0);
+
+  // Investments - valores até hoje, pagos e restantes
+  const totalInvestmentsPaid = currentMonth.investments
+    .filter(i => (i.dayOfMonth || 32) <= currentDay && i.isPaid)
+    .reduce((acc, curr) => acc + Number(curr.amount), 0);
+  const totalInvestmentsRemaining = predictedInvestments - totalInvestmentsPaid;
+  const totalInvestmentsOverall = currentMonth.investments.reduce((acc, curr) => acc + Number(curr.amount), 0);
+
+  // Misc Expenses - valores até hoje, pagos e restantes
+  const totalMiscPaid = currentMonth.miscExpenses
+    .filter(m => (m.dayOfMonth || 32) <= currentDay && m.isPaid)
+    .reduce((acc, curr) => acc + Number(curr.amount), 0);
+  const totalMiscRemaining = predictedMisc - totalMiscPaid;
+  const totalMiscOverall = currentMonth.miscExpenses.reduce((acc, curr) => acc + Number(curr.amount), 0);
+
+  const nextUpcomingIncome = currentMonth.incomes
+    .filter(i => (i.dayOfMonth || 0) > currentDay && !i.isReceived)
+    .sort((a, b) => (a.dayOfMonth || 32) - (b.dayOfMonth || 32))
+    .at(0); // get the first one
+
+  // Combine transactions - use updatedAt to show recent pay/receive actions
+  const transactions: Transaction[] = [
+    ...currentMonth.incomes.map(i => ({ id: i.id, type: "income" as const, description: i.description, amount: Number(i.amount), date: i.updatedAt })),
+    ...currentMonth.expenses.map(e => ({ id: e.id, type: "expense" as const, description: e.description, amount: Number(e.totalAmount), date: e.updatedAt })),
+    ...currentMonth.investments.map(i => ({ id: i.id, type: "investment" as const, description: i.description, amount: Number(i.amount), date: i.updatedAt })),
+    ...currentMonth.miscExpenses.map(m => ({ id: m.id, type: "misc" as const, description: m.description, amount: Number(m.amount), date: m.updatedAt })),
+  ].sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
+    .slice(0, 10); // Show last 10
+
+  const currentDate = new Date(year, month - 1);
+
+  return (
+    <div className="flex min-h-screen flex-col gap-6 pb-32 pt-4 px-4 md:px-8 max-w-5xl mx-auto w-full">
+      <MonthNavigationHeader currentDate={currentDate} availableMonths={availableMonths} />
+
+      <div className="flex flex-col items-center justify-center py-8">
+        <h1 className={`text-5xl font-bold tracking-tighter ${totals.balance > 0 ? "text-emerald-500" : totals.balance < 0 ? "text-red-500" : "text-foreground"}`}>
+          {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totals.balance)}
+        </h1>
+        <p className="mt-2 text-sm font-medium text-muted-foreground uppercase tracking-widest">Saldo do Mês</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <IncomeCard total={totals.totalIncome} />
+        <ExpenseCard total={totals.totalExpense} />
+      </div>
+
+      <div className="w-full">
+        <MonthPlanningAlert
+          currentYear={year}
+          currentMonth={month}
+          userId={dbUser.id}
+          planningAlertDays={dbUser.planningAlertDays}
+          nextMonthExists={!!nextMonthExists}
+        />
+      </div>
+
+      <div className="mt-2">
+        <Tabs defaultValue="prediction" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-6 bg-muted/20 p-1 rounded-xl">
+            <TabsTrigger
+              value="prediction"
+              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold transition-all"
+            >
+              Resumo do Dia
+            </TabsTrigger>
+            <TabsTrigger
+              value="upcoming"
+              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold transition-all"
+            >
+              Próximas
+            </TabsTrigger>
+            <TabsTrigger
+              value="pending"
+              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold transition-all"
+            >
+              Recentes
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="prediction" className="mt-0 outline-none animate-in fade-in-50 slide-in-from-bottom-2">
+            <ReceiptSummary
+              userName={dbUser.name?.split(" ")[0] || "Usuário"}
+              currentDay={currentDay}
+              incomesUpToToday={predictedIncomes}
+              incomesReceived={incomesReceived}
+              incomesRemaining={incomesRemainingTotal}
+              expensesUpToToday={predictedExpenses}
+              expensesPaid={expensesPaid}
+              expensesRemaining={expensesRemainingTotal}
+              investmentsUpToToday={predictedInvestments}
+              investmentsPaid={investmentsPaid}
+              investmentsRemaining={investmentsRemainingTotal}
+              miscUpToToday={predictedMisc}
+              miscPaid={miscPaid}
+              miscRemaining={miscRemainingTotal}
+              balance={predictedBalance}
+              nextUpcomingIncome={nextUpcomingIncome ? { dayOfMonth: nextUpcomingIncome.dayOfMonth, amount: Number(nextUpcomingIncome.amount) } : undefined}
+            />
+          </TabsContent>
+
+          <TabsContent value="upcoming" className="mt-0 outline-none animate-in fade-in-50 slide-in-from-bottom-2">
+            <UpcomingActionsList
+              actions={[
+                ...currentMonth.incomes.map(i => ({
+                  id: i.id,
+                  type: "income" as const,
+                  description: i.description,
+                  amount: Number(i.amount),
+                  dayOfMonth: i.dayOfMonth
                 })),
-              ...currentMonth.investments.map(i => ({
-                id: i.id,
-                type: "investment" as const,
-                description: i.description,
-                amount: Number(i.amount),
-                dayOfMonth: i.dayOfMonth
-              }))
-            ]}
-            currentMonth={month}
-            currentYear={year}
-          />
-        </TabsContent>
+                ...currentMonth.expenses
+                  .filter(e => Number(e.paidAmount) < Number(e.totalAmount)) // Only pending/partial expenses
+                  .map(e => ({
+                    id: e.id,
+                    type: "expense" as const,
+                    description: e.description,
+                    amount: Number(e.totalAmount) - Number(e.paidAmount), // Remaining amount
+                    dayOfMonth: e.dayOfMonth,
+                    status: Number(e.paidAmount) > 0 ? "partial" as const : "pending" as const
+                  })),
+                ...currentMonth.investments.map(i => ({
+                  id: i.id,
+                  type: "investment" as const,
+                  description: i.description,
+                  amount: Number(i.amount),
+                  dayOfMonth: i.dayOfMonth
+                }))
+              ]}
+              currentMonth={month}
+              currentYear={year}
+            />
+          </TabsContent>
 
-        <TabsContent value="pending" className="mt-0 outline-none animate-in fade-in-50 slide-in-from-bottom-2">
-          <RecentTransactionsList transactions={transactions} />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="pending" className="mt-0 outline-none animate-in fade-in-50 slide-in-from-bottom-2">
+            <RecentTransactionsList transactions={transactions} />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
-  </div>
-);
+  );
 }
