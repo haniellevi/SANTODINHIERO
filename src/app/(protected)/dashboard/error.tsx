@@ -15,6 +15,9 @@ export default function Error({
     useEffect(() => {
         // Log the error to an error reporting service
         console.error('Dashboard Error:', error);
+        console.error('Dashboard Error Digest:', error.digest);
+        console.error('Dashboard Error Stack:', error.stack);
+        console.error('Dashboard Error JSON:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
     }, [error]);
 
     return (
