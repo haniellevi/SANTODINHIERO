@@ -29,6 +29,7 @@ interface DashboardPageProps {
 }
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  console.log("--- DEBUG LOG INÍCIO ---");
   const clerkUser = await currentUser();
 
   if (!clerkUser) {
@@ -41,11 +42,18 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const params = await searchParams;
 
   const now = new Date();
+  console.log(`[Dashboard Debug] Raw Date: ${now.toISOString()}`);
+  console.log(`[Dashboard Debug] now.getMonth(): ${now.getMonth()}`);
+  console.log(`[Dashboard Debug] now.getFullYear(): ${now.getFullYear()}`);
   const monthParam = params?.month;
   const yearParam = params?.year;
+  console.log(`[Dashboard Debug] monthParam: ${monthParam}`);
+  console.log(`[Dashboard Debug] yearParam: ${yearParam}`);
 
   const month = monthParam ? parseInt(monthParam as string) : now.getMonth() + 1;
   const year = yearParam ? parseInt(yearParam as string) : now.getFullYear();
+  console.log(`[Dashboard Debug] Resolved Month: ${month}`);
+  console.log(`[Dashboard Debug] Resolved Year: ${year}`);
 
   // Get all available months for navigation
   console.log('[Dashboard] Fetching user months...');
