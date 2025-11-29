@@ -17,6 +17,8 @@ import { ExpenseType } from "@prisma/client";
 import { Metadata } from "next";
 import { prisma } from "@/lib/db";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "Dashboard Financeiro",
   description: "Visão geral das suas finanças",
