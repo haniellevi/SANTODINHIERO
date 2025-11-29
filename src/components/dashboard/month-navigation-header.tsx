@@ -4,14 +4,14 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { formatMonthYear } from "@/lib/date-utils";
+import { MonthsManagementDialog } from "./months-management-dialog";
 
 interface MonthNavigationHeaderProps {
     currentDate: Date;
     availableMonths: { month: number; year: number }[];
     userId: string;
 }
-
-import { MonthsManagementDialog } from "./months-management-dialog";
 
 export function MonthNavigationHeader({
     currentDate,
@@ -51,10 +51,7 @@ export function MonthNavigationHeader({
         router.push(`/dashboard?${params.toString()}`);
     };
 
-    const formattedDate = new Intl.DateTimeFormat("pt-BR", {
-        month: "long",
-        year: "numeric",
-    }).format(currentDate).replace(" de ", " - ");
+    const formattedDate = formatMonthYear(currentDate);
 
     return (
         <div className="flex items-center justify-between py-4">
@@ -79,7 +76,7 @@ export function MonthNavigationHeader({
             </div>
 
             <div className="flex flex-col items-center">
-                <h2 className="text-xl font-bold capitalize tracking-tight text-primary">
+                <h2 className="text-xl font-bold tracking-tight text-primary">
                     {formattedDate}
                 </h2>
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
